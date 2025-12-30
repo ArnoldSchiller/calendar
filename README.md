@@ -1,5 +1,3 @@
-
-
 ````markdown
 # Projekt IT Calendar
 
@@ -103,7 +101,7 @@ UUID: `calendar@projektit.de`
 
 ```
 
----
+
 
 
 
