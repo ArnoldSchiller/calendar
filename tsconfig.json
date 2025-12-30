@@ -1,0 +1,19 @@
+{
+  "compilerOptions": {
+    "target": "ES2020",
+    "module": "None",
+    "outFile": "./files/calendar@projektit.de/applet.js",
+    "strict": true,
+    "noImplicitAny": false,
+    "lib": ["ES2020"],
+    "moduleResolution": "node",
+    "removeComments": false
+  },
+  "include": [
+    "src/declarations.d.ts",
+    "src/EventManager.ts",
+    "src/calendarView.ts",
+    "src/applet.ts",
+    "src/kalenderlogik.ts",
+  ]
+}

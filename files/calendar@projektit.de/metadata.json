@@ -1,0 +1,8 @@
+{
+    "uuid": "calendar@projektit.de",
+    "name": "Projekt IT Calendar",
+    "description": "Extended with holidays and system events",
+    "max-instances": 1,
+    "multiconf": false,
+    "icon": "icon"
+}
