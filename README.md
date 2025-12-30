@@ -1,4 +1,4 @@
-````markdown
+
 # Projekt IT Calendar
 
 **Cinnamon Spices Applet** – An extended calendar for Cinnamon, including holidays and system events.  
