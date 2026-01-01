@@ -55,7 +55,7 @@ function setupLocalization(uuid: string, path: string) {
 }
 
 class UniversalCalendarApplet extends Applet.TextIconApplet {
-    public calendarView: any;
+    public CalendarView: any;
     public eventManager: EventManager;
     public eventListView: EventListView;
     public CalendarLogic: CalendarLogic;
@@ -99,7 +99,7 @@ class UniversalCalendarApplet extends Applet.TextIconApplet {
 
             // 2. Dynamic Component Loading
             // We use requireModule for the View to allow for easier modular updates
-            const CalendarModule = FileUtils.requireModule(metadata.path + "/calendarView.js");
+            const CalendarModule = FileUtils.requireModule(metadata.path + "/CalendarView.js");
              
             // 3. Settings Binding
             this.settings.bind("show-events", "showEvents", this.on_settings_changed.bind(this));
@@ -132,7 +132,7 @@ class UniversalCalendarApplet extends Applet.TextIconApplet {
             });
             
             headerBox.connect("button-release-event", () => {
-                this.calendarView.resetToToday();
+                this.CalendarView.resetToToday();
                 this.setHeaderDate(new Date());
             });
 
@@ -146,8 +146,8 @@ class UniversalCalendarApplet extends Applet.TextIconApplet {
             this._mainBox.add_actor(headerBox);
 
             // 5. Calendar View Initialization
-            this.calendarView = new CalendarModule.CalendarView(this);
-            this._mainBox.add_actor(this.calendarView.actor);
+            this.CalendarView = new CalendarModule.CalendarView(this);
+            this._mainBox.add_actor(this.CalendarView.actor);
 
             /**
              * Footer Section:
@@ -186,11 +186,11 @@ class UniversalCalendarApplet extends Applet.TextIconApplet {
 
             this.menu.connect("open-state-changed", (menu: any, isOpen: boolean) => {
                 if (isOpen) {
-                    this.calendarView.render();
+                    this.CalendarView.render();
                     this.setHeaderDate(new Date());
                     // Focus handling for keyboard navigation
                     GLib.timeout_add(GLib.PRIORITY_DEFAULT, 50, () => {
-                        this.calendarView.actor.grab_key_focus();
+                        this.CalendarView.actor.grab_key_focus();
                         return false;
                     });
                 }
@@ -233,7 +233,7 @@ class UniversalCalendarApplet extends Applet.TextIconApplet {
     on_settings_changed() {
         this.update_label_and_tooltip();
         if (this.menu.isOpen) {
-            this.calendarView.render();
+            this.CalendarView.render();
         }
     }
 
@@ -267,7 +267,7 @@ class UniversalCalendarApplet extends Applet.TextIconApplet {
         this._dateLabel.set_text(gDate.format("%e. %B %Y"));
 
         // Ask the view's data provider for holiday info
-        const tagInfo = this.calendarView.getHolidayForDate(date);
+        const tagInfo = this.CalendarView.getHolidayForDate(date);
         if (tagInfo && tagInfo.beschreibung) {
             this._holidayLabel.set_text(tagInfo.beschreibung);
             this._holidayLabel.show();

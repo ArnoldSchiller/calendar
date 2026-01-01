@@ -55,7 +55,7 @@ function setupLocalization(uuid: string, path: string) {
 }
 
 class UniversalCalendarApplet extends Applet.TextIconApplet {
-    public calendarView: any;
+    public CalendarView: any;
     public eventManager: EventManager;
     public eventListView: EventListView;
     public CalendarLogic: CalendarLogic;
@@ -99,7 +99,7 @@ class UniversalCalendarApplet extends Applet.TextIconApplet {
 
             // 2. Dynamic Component Loading
             // We use requireModule for the View to allow for easier modular updates
-            const CalendarModule = FileUtils.requireModule(metadata.path + "/calendarView.js");
+            const CalendarModule = FileUtils.requireModule(metadata.path + "/CalendarView.js");
              
             // 3. Settings Binding
             this.settings.bind("show-events", "showEvents", this.on_settings_changed.bind(this));
@@ -132,7 +132,7 @@ class UniversalCalendarApplet extends Applet.TextIconApplet {
             });
             
             headerBox.connect("button-release-event", () => {
-                this.calendarView.resetToToday();
+                this.CalendarView.resetToToday();
                 this.setHeaderDate(new Date());
             });
 
@@ -146,8 +146,8 @@ class UniversalCalendarApplet extends Applet.TextIconApplet {
             this._mainBox.add_actor(headerBox);
 
             // 5. Calendar View Initialization
-            this.calendarView = new CalendarModule.CalendarView(this);
-            this._mainBox.add_actor(this.calendarView.actor);
+            this.CalendarView = new CalendarModule.CalendarView(this);
+            this._mainBox.add_actor(this.CalendarView.actor);
 
             /**
              * Footer Section:
@@ -186,11 +186,11 @@ class UniversalCalendarApplet extends Applet.TextIconApplet {
 
             this.menu.connect("open-state-changed", (menu: any, isOpen: boolean) => {
                 if (isOpen) {
-                    this.calendarView.render();
+                    this.CalendarView.render();
                     this.setHeaderDate(new Date());
                     // Focus handling for keyboard navigation
                     GLib.timeout_add(GLib.PRIORITY_DEFAULT, 50, () => {
-                        this.calendarView.actor.grab_key_focus();
+                        this.CalendarView.actor.grab_key_focus();
                         return false;
                     });
                 }
@@ -233,7 +233,7 @@ class UniversalCalendarApplet extends Applet.TextIconApplet {
     on_settings_changed() {
         this.update_label_and_tooltip();
         if (this.menu.isOpen) {
-            this.calendarView.render();
+            this.CalendarView.render();
         }
     }
 
@@ -267,7 +267,7 @@ class UniversalCalendarApplet extends Applet.TextIconApplet {
         this._dateLabel.set_text(gDate.format("%e. %B %Y"));
 
         // Ask the view's data provider for holiday info
-        const tagInfo = this.calendarView.getHolidayForDate(date);
+        const tagInfo = this.CalendarView.getHolidayForDate(date);
         if (tagInfo && tagInfo.beschreibung) {
             this._holidayLabel.set_text(tagInfo.beschreibung);
             this._holidayLabel.show();
@@ -289,16 +289,43 @@ class UniversalCalendarApplet extends Applet.TextIconApplet {
 }
 
 /**
- * Entry point called by Cinnamon at runtime.
+ * CINNAMON ENTRY POINT
+ * --------------------
+ * This function is the primary entry point called by the Cinnamon shell.
+ * * IMPORTANT FOR PRODUCTION:
+ * Since we use AMD bundling, we assign the main function to the global scope
+ * from WITHIN the module to ensure the class is fully defined when called.
  */
 function main(metadata: any, orientation: any, panel_height: number, instance_id: number) {
     try {
+        // Since we are inside the 'applet' module scope here, 
+        // we can instantiate the class directly.
         return new UniversalCalendarApplet(metadata, orientation, panel_height, instance_id);
     } catch (e) {
-        global.log(metadata.uuid + ": Error in main(): " + e);
+        if (typeof global !== 'undefined') {
+            global.log(metadata.uuid + "CRITICAL: Initialization failed: " + e);
+        }
         return null;
     }
 }
 
-// Export for Cinnamon's internal loader
+/**
+ * EXPORT FOR CINNAMON
+ * We bridge the modular code to Cinnamon's global requirement.
+ */
+// Export Prod global
+if (typeof global !== 'undefined') {
+    // for generated applet.js 
+    global.main = main;
+
+    // Ensure that the applet is available 
+    if (typeof Applet !== 'undefined') {
+        global.Applet = Applet;
+    }
+}
 (global as any).main = main;
+
+
+
+
+

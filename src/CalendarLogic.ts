@@ -73,8 +73,16 @@ export class CalendarLogic {
         }
     }
 
+
+
     /**
-     * Returns all holidays for a specific date and region.
+     * getHolidaysForDate: Returns all holidays for a specific date and region.
+     * Used by: 
+     * - applet.ts: via setHeaderDate() to update the popup header.
+     * - CalendarView.ts: during renderMonthView() to mark holiday cells and tooltips.
+     * * @param date - The Date object to check.
+     * @param region - Regional code (e.g., "de-BY"). Defaults to "de".
+     * @returns An array of unique holiday names.
      */
     public getHolidaysForDate(date: Date, region: string = "de"): string[] {
         let dayHolidays: string[] = [];
@@ -89,7 +97,13 @@ export class CalendarLogic {
                 dayHolidays.push(rule.n);
             }
         }
-        return dayHolidays;
+
+        /**
+         * REMOVE DUPLICATES:
+         * Using a Set ensures that if a holiday (like "New Year") is defined in 
+         * both the base and regional rules, it only appears once in the UI.
+         */
+        return [...new Set(dayHolidays)];
     }
 
     /**
