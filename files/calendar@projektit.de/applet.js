@@ -950,15 +950,15 @@ define("EventManager", ["require", "exports"], function (require, exports) {
 /**
  * Universal Calendar Applet Core
  * ------------------------------
- * This is the entry point for the Cinnamon Applet. It acts as the "Controller"
+ * This is the entry point for the Cinnamon Applet. It acts as the Controller
  * in an MVC-like architecture, connecting the Cinnamon Panel with the
  * underlying Logic and UI components.
- * * ARCHITECTURE OVERVIEW:
+ * * * ARCHITECTURE OVERVIEW:
  * 1. EventManager: Handles data fetching (ICS/Evolution/System).
- * 2. CalenderLogic: Pure JS logic for date calculations and holidays.
+ * 2. CalendarLogic: Pure JS logic for date calculations and holiday parsing.
  * 3. CalendarView: The complex St.Table based UI grid.
  * 4. EventListView: Specialized view for displaying event details.
- * * SYSTEM INTEGRATION:
+ * * * SYSTEM INTEGRATION:
  * - Uses 'Settings' for user-defined date formats and behavior.
  * - Uses 'AppletPopupMenu' to host the calendar UI.
  * - Uses 'KeybindingManager' for global hotkey support.
@@ -985,10 +985,14 @@ define("applet", ["require", "exports", "EventManager", "EventListView", "Calend
      * Initialized in setupLocalization() to support multiple applet instances.
      */
     let _;
+    /**
+     * Setup internationalization for the applet.
+     * It establishes a priority chain for translations to minimize missing strings:
+     * Priority: 1. Applet Context, 2. Cinnamon Core, 3. Gnome Calendar
+     */
     function setupLocalization(uuid, path) {
         Gettext.bindtextdomain(uuid, path + "/locale");
         _ = function (str) {
-            // Priority: 1. Applet Context, 2. Cinnamon Core, 3. Gnome Calendar fallback
             let custom = Gettext.dgettext(uuid, str);
             if (custom !== str)
                 return custom;
@@ -1002,7 +1006,8 @@ define("applet", ["require", "exports", "EventManager", "EventListView", "Calend
         constructor(metadata, orientation, panel_height, instance_id) {
             super(orientation, panel_height, instance_id);
             this._updateId = 0;
-            // Bound Settings (reflects values from settings-schema.json)
+            // Bound Settings
+            this.showIcon = false;
             this.showEvents = true;
             this.showWeekNumbers = false;
             this.useCustomFormat = false;
@@ -1017,31 +1022,30 @@ define("applet", ["require", "exports", "EventManager", "EventListView", "Calend
                 this.menuManager = new PopupMenu.PopupMenuManager(this);
                 this.eventManager = new EventManager_1.EventManager();
                 this.eventListView = new EventListView_1.EventListView();
-                // CalendarLogic Instanz 
-                // metadata.path for /holidays/*.json 
+                // CalendarLogic Instance (path is needed for /holidays/*.json)
                 this.CalendarLogic = new CalendarLogic_1.CalendarLogic(metadata.path);
                 // 2. Dynamic Component Loading
-                // We use requireModule for the View to allow for easier modular updates
-                const CalendarModule = FileUtils.requireModule(metadata.path + "/CalendarView.js");
+                // Using requireModule for the View allows for a decoupled UI layer
+                const CalendarModule = FileUtils.requireModule(metadata.path + '/CalendarView');
                 // 3. Settings Binding
-                this.settings.bind("show-events", "showEvents", this.on_settings_changed.bind(this));
-                this.settings.bind("show-week-numbers", "showWeekNumbers", this.on_settings_changed.bind(this));
-                this.settings.bind("use-custom-format", "useCustomFormat", this.on_settings_changed.bind(this));
-                this.settings.bind("custom-format", "customFormat", this.on_settings_changed.bind(this));
-                this.settings.bind("custom-tooltip-format", "customTooltipFormat", this.on_settings_changed.bind(this));
-                this.settings.bind("keyOpen", "keyOpen", this.on_hotkey_changed.bind(this));
-                this.set_applet_icon_name("office-calendar");
-                // 4. UI Construction
+                this.settings.bind("show-icon", "showIcon", this.on_settings_changed);
+                this.settings.bind("show-events", "showEvents", this.on_settings_changed);
+                this.settings.bind("show-week-numbers", "showWeekNumbers", this.on_settings_changed);
+                this.settings.bind("use-custom-format", "useCustomFormat", this.on_settings_changed);
+                this.settings.bind("custom-format", "customFormat", this.on_settings_changed);
+                this.settings.bind("custom-tooltip-format", "customTooltipFormat", this.on_settings_changed);
+                this.settings.bind("keyOpen", "keyOpen", this.on_hotkey_changed);
+                // 4. Popup Menu Construction
                 this.menu = new Applet.AppletPopupMenu(this, orientation);
                 this.menuManager.addMenu(this.menu);
-                // Main container with vertical layout
+                // Main UI container with vertical layout
                 this._mainBox = new St.BoxLayout({
                     vertical: true,
                     style_class: 'calendar-main-box'
                 });
                 /**
                  * Header Box: Displays current day/date.
-                 * Acts as a "Home" button to return to today's date in the calendar view.
+                 * Acts as a "Home" button to return to today's date in the grid.
                  */
                 let headerBox = new St.BoxLayout({
                     vertical: true,
@@ -1052,21 +1056,21 @@ define("applet", ["require", "exports", "EventManager", "EventListView", "Calend
                     this.CalendarView.resetToToday();
                     this.setHeaderDate(new Date());
                 });
-                this._dayLabel = new St.Label({ style_class: 'calendar-today-day-label' });
-                this._dateLabel = new St.Label({ style_class: 'calendar-today-date-label' });
-                this._holidayLabel = new St.Label({ style_class: 'calendar-holiday-label', text: "" });
+                this._dayLabel = new St.Label({ style_class: 'calendar-today-day' });
+                this._dateLabel = new St.Label({ style_class: 'calendar-today-date' });
+                this._holidayLabel = new St.Label({ style_class: 'calendar-today-holiday' });
                 headerBox.add_actor(this._dayLabel);
                 headerBox.add_actor(this._dateLabel);
                 headerBox.add_actor(this._holidayLabel);
                 this._mainBox.add_actor(headerBox);
-                // 5. Calendar View Initialization
+                // 5. Calendar Grid Initialization
                 this.CalendarView = new CalendarModule.CalendarView(this);
                 this._mainBox.add_actor(this.CalendarView.actor);
                 /**
                  * Footer Section:
                  * Provides quick access to system-wide date settings and external calendar apps.
                  */
-                let footerBox = new St.BoxLayout({ style_class: 'calendar-footer', vertical: false });
+                let footerBox = new St.BoxLayout({ style_class: 'calendar-footer' });
                 let settingsBtn = new St.Button({
                     label: _("Date and Time Settings"),
                     style_class: 'calendar-footer-button',
@@ -1090,21 +1094,22 @@ define("applet", ["require", "exports", "EventManager", "EventListView", "Calend
                 this._mainBox.add_actor(footerBox);
                 this.menu.addActor(this._mainBox);
                 // 6. Signal Handling & Lifecycle
+                this.on_settings_changed();
                 this.on_hotkey_changed();
                 this.menu.connect("open-state-changed", (menu, isOpen) => {
                     if (isOpen) {
                         this.CalendarView.render();
                         this.setHeaderDate(new Date());
-                        // Focus handling for keyboard navigation
+                        // Deferred focus handling to ensure UI is fully mapped before grabbing focus
                         GLib.timeout_add(GLib.PRIORITY_DEFAULT, 50, () => {
                             this.CalendarView.actor.grab_key_focus();
                             return false;
                         });
                     }
                 });
-                // Refresh the panel label periodically (every 10 seconds)
+                // Periodic refresh of panel clock and tooltip (every 10 seconds)
                 this.update_label_and_tooltip();
-                this._updateId = GLib.timeout_add(GLib.PRIORITY_DEFAULT, 10000, () => {
+                this._updateId = GLib.timeout_add_seconds(GLib.PRIORITY_DEFAULT, 10, () => {
                     this.update_label_and_tooltip();
                     return true;
                 });
@@ -1114,7 +1119,37 @@ define("applet", ["require", "exports", "EventManager", "EventListView", "Calend
             }
         }
         /**
-         * Triggered when user clicks the panel icon.
+         * Unified handler for settings changes.
+         * Manages Icon visibility and UI re-rendering.
+         */
+        on_settings_changed() {
+            // Toggle Panel Icon visibility
+            if (this.showIcon) {
+                this.set_applet_icon_name("office-calendar");
+                if (this._applet_icon_box)
+                    this._applet_icon_box.show();
+            }
+            else {
+                this._hide_icon();
+            }
+            this.update_label_and_tooltip();
+            // If the menu is open, we need to re-render to reflect format changes
+            if (this.menu && this.menu.isOpen) {
+                this.CalendarView.render();
+            }
+        }
+        /**
+         * Helper to cleanly remove the icon from the panel.
+         * Different Cinnamon versions handle empty icons differently; this ensures it's hidden.
+         */
+        _hide_icon() {
+            this.set_applet_icon_name("");
+            if (this._applet_icon_box) {
+                this._applet_icon_box.hide();
+            }
+        }
+        /**
+         * Triggered when user clicks the panel applet.
          */
         on_applet_clicked(event) {
             if (!this.menu.isOpen) {
@@ -1123,7 +1158,7 @@ define("applet", ["require", "exports", "EventManager", "EventListView", "Calend
             this.menu.toggle();
         }
         /**
-         * Updates the global hotkey based on settings.
+         * Updates the global hotkey based on user settings.
          */
         on_hotkey_changed() {
             Main.keybindingManager.removeHotKey(`${this.uuid}-open`);
@@ -1133,15 +1168,10 @@ define("applet", ["require", "exports", "EventManager", "EventListView", "Calend
                 });
             }
         }
-        on_settings_changed() {
-            this.update_label_and_tooltip();
-            if (this.menu.isOpen) {
-                this.CalendarView.render();
-            }
-        }
         /**
          * Core Panel Logic:
-         * Sets the text displayed on the Cinnamon panel and its tooltip.
+         * Sets the text (Clock) displayed on the Cinnamon panel and its tooltip.
+         * Supports both system locale and user-defined custom formats.
          */
         update_label_and_tooltip() {
             const now = new Date();
@@ -1149,12 +1179,12 @@ define("applet", ["require", "exports", "EventManager", "EventListView", "Calend
             let timeLabel = this.useCustomFormat ? gNow.format(this.customFormat) :
                 now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
             let dateTooltip = this.useCustomFormat ? gNow.format(this.customTooltipFormat) :
-                now.toLocaleDateString([], { weekday: 'long', day: '2-digit', month: 'long', year: 'numeric' });
+                now.toLocaleDateString([], { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
             this.set_applet_label(timeLabel || "");
             this.set_applet_tooltip(dateTooltip || "");
         }
         /**
-         * Updates the UI Header inside the popup.
+         * Updates the UI Header inside the popup menu.
          * Shows Day, Date, and specific holiday descriptions if available.
          */
         setHeaderDate(date) {
@@ -1163,7 +1193,7 @@ define("applet", ["require", "exports", "EventManager", "EventListView", "Calend
             const gDate = GLib.DateTime.new_from_unix_local(date.getTime() / 1000);
             this._dayLabel.set_text(gDate.format("%A"));
             this._dateLabel.set_text(gDate.format("%e. %B %Y"));
-            // Ask the view's data provider for holiday info
+            // Ask the view's data provider (CalendarLogic) for holiday info
             const tagInfo = this.CalendarView.getHolidayForDate(date);
             if (tagInfo && tagInfo.beschreibung) {
                 this._holidayLabel.set_text(tagInfo.beschreibung);
@@ -1175,6 +1205,7 @@ define("applet", ["require", "exports", "EventManager", "EventListView", "Calend
         }
         /**
          * Cleanup: Called when applet is removed or Cinnamon restarts.
+         * Essential to prevent memory leaks and dangling signals/hotkeys.
          */
         on_applet_removed_from_panel() {
             Main.keybindingManager.removeHotKey(`${this.uuid}-open`);
@@ -1187,38 +1218,31 @@ define("applet", ["require", "exports", "EventManager", "EventListView", "Calend
     /**
      * CINNAMON ENTRY POINT
      * --------------------
-     * This function is the primary entry point called by the Cinnamon shell.
-     * * IMPORTANT FOR PRODUCTION:
-     * Since we use AMD bundling, we assign the main function to the global scope
-     * from WITHIN the module to ensure the class is fully defined when called.
+     * This function is the primary entry point called by the Cinnamon applet manager.
      */
     function main(metadata, orientation, panel_height, instance_id) {
         try {
-            // Since we are inside the 'applet' module scope here, 
-            // we can instantiate the class directly.
             return new UniversalCalendarApplet(metadata, orientation, panel_height, instance_id);
         }
         catch (e) {
             if (typeof global !== 'undefined') {
-                global.log(metadata.uuid + "CRITICAL: Initialization failed: " + e);
+                global.log(metadata.uuid + " CRITICAL: Initialization error: " + e);
             }
             return null;
         }
     }
     /**
      * EXPORT FOR CINNAMON
-     * We bridge the modular code to Cinnamon's global requirement.
+     * -------------------
+     * We bridge the modular code to Cinnamon's global scope requirements.
+     * This ensures the main() function is reachable regardless of bundling method.
      */
-    // Export Prod global
     if (typeof global !== 'undefined') {
-        // for generated applet.js 
         global.main = main;
-        // Ensure that the applet is available 
         if (typeof Applet !== 'undefined') {
             global.Applet = Applet;
         }
     }
-    global.main = main;
 });
 
 /**
