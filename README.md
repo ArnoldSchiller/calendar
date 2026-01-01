@@ -157,6 +157,17 @@ msgstr "Kalender importieren (.ics)"
 ---
 
 
+## 🔬 Technical Comparison
+
+| Feature | This Applet | Traditional Cinnamon Calendar |
+|---------|-------------|-------------------------------|
+| **Codebase** | TypeScript with types | Plain JavaScript (2012) |
+| **Architecture** | Modular, separated concerns | Monolithic `eventViewer.js` |
+| **Build System** | Dev/Prod with AMD bundling | Manual concatenation |
+| **Holiday System** | JSON-based, regional, historical | Hardcoded, limited |
+| **Event Integration** | DBus via Calendar Server | Mixed approaches |
+| **Translation** | Smart fallback system | Manual .po files |
+| **Maintenance** | Easy to extend | Difficult to modify |
 
 
 ### For Developers:
