@@ -234,6 +234,16 @@ ln -s "$PWD/files/calendar@projektit.de" ~/.local/share/cinnamon/applets/
 
 ## 📊 Holiday System
 
+```
+files/calendar@projektit.de/holidays:
+ar.json  ca.json       el.json  fi.json  hu.json  kk.json  mt.json  pt.json  sl.json                 sv.json           vi.json
+be.json  cs.json       en.json  fr.json  id.json  ko.json  nb.json  ro.json  sr@ijekavian.json       tr.json           wa.json
+bg.json  da.json       es.json  ga.json  is.json  lb.json  nl.json  ru.json  sr@ijekavianlatin.json  uk.json           zh.json
+bn.json  default.json  et.json  he.json  it.json  lt.json  nn.json  si.json  sr.json                 uz@cyrillic.json
+bs.json  de.json       fa.json  hr.json  ja.json  lv.json  pl.json  sk.json  sr@latin.json           uz.json
+```
+Data based on the KDE KHolidays framework (plan2 files generated 2025)
+
 ### Configuration Files:
 Holidays are defined in JSON files in `/holidays/`:
 ```json
