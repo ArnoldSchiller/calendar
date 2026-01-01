@@ -473,7 +473,7 @@ define("CalendarView", ["require", "exports"], function (require, exports) {
              * The logic to parse .ics files via GLib is still pending.
              */
             const actionArea = new St.BoxLayout({ x_align: St.Align.MIDDLE, style: "padding: 10px;" });
-            const importBtn = new St.Button({ label: _("Import a Calendar (.ics)"), style_class: "calendar-event-button" });
+            const importBtn = new St.Button({ label: _("Import a Calendar"), style_class: "calendar-event-button" });
             importBtn.connect("clicked", () => {
                 global.log("[CalendarView] ICS Import requested - TODO: Implement FileChooser");
                 this.onImportRequested?.();
@@ -523,7 +523,8 @@ define("CalendarView", ["require", "exports"], function (require, exports) {
             else if (box.get_n_children() === 1) { // Only title present
                 box.add_actor(new St.Label({ text: _("No events"), style_class: "calendar-events-no-events-label" }));
             }
-            const backBtn = new St.Button({ label: _("Back to Month"), style_class: "nav-button", style: "margin-top: 15px;" });
+            /* label Month view - no Back to Month or something like that because others are not translated */
+            const backBtn = new St.Button({ label: _("Month view"), style_class: "nav-button", style: "margin-top: 15px;" });
             backBtn.connect("clicked", () => { this.currentView = "MONTH"; this.render(); });
             box.add_actor(backBtn);
             this.contentBox.add_actor(box);
