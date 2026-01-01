@@ -1,0 +1,12 @@
+{
+  "compilerOptions": {
+    "target": "ES2020",
+    "module": "None",
+    "outDir": "./files/calendar@projektit.de",
+    "rootDir": "./src",
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "removeComments": false
+  },
+  "include": ["src/**/*"]
+}
