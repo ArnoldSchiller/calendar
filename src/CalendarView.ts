@@ -315,7 +315,8 @@ export class CalendarView {
          * The logic to parse .ics files via GLib is still pending.
          */
         const actionArea = new St.BoxLayout({ x_align: St.Align.MIDDLE, style: "padding: 10px;" });
-        const importBtn = new St.Button({ label: _("Import a Calendar"), style_class: "calendar-event-button" });
+        const importBtn = new St.Button({ label: _("Import a Calendar"), style_class: "calendar-event-button",  x_expand: true
+});
         importBtn.connect("clicked", () => {
             global.log("[CalendarView] ICS Import requested - TODO: Implement FileChooser");
             this.onImportRequested?.();
@@ -341,6 +342,9 @@ export class CalendarView {
         yearBox.add_actor(grid);
         this.contentBox.add_actor(yearBox);
     }
+/*---------------------------------------------------------------------------------------------------------------------
+*  Day View
+*  --------------------------------------------------------------------------------------------------------------------*/
 
     private renderDayView() {
         const box = new St.BoxLayout({ vertical: true, style_class: "calendar-events-main-box" });
