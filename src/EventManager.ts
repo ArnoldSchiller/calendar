@@ -37,6 +37,12 @@ const Cinnamon = imports.gi.Cinnamon;
 const GLib = imports.gi.GLib;
 const Signals = imports.signals;
 const Mainloop = imports.mainloop;
+const ECal = imports.gi.ECal;
+const ICal = imports.gi.ICalGLib;
+const EDataServer = imports.gi.EDataServer;                                                              
+
+
+
 
 /**
  * EventData Interface
@@ -44,6 +50,7 @@ const Mainloop = imports.mainloop;
  */
 export interface EventData {
     id: string;
+    sourceUid: string;
     start: Date;        
     end: Date;          // bei Ganztag = Folgetag 00:00)
     summary: string;
@@ -74,7 +81,9 @@ export class EventManager {
     private _isReady: boolean = false;
     private _selectedDate: Date;
     private _uuid: string;
-
+    
+    private _registry: any | null = null;
+    private _clientCache = new Map<string,any>();
     /**
      * @param uuid - The unique identifier of the applet for logging purposes.
      */
@@ -99,6 +108,7 @@ export class EventManager {
         this._events = [
             {
                 id: "init-state",
+		sourceUid: "Teststring",
                 start: today,
                 end: today,
                 summary: "Calendar Manager Active",
@@ -238,6 +248,177 @@ export class EventManager {
         // Notify the UI to re-render
         this.emit('events-updated');
     }
+
+    private resolveClientForEvent(ev: EventData): any | null {
+    try {
+        // Registry lazy initialisieren
+        if (!this._registry) {
+            this._registry = EDataServer.SourceRegistry.new_sync(null);
+        }
+
+        // Cache-Hit?
+        if (this._clientCache.has(ev.sourceUid)) {
+            return this._clientCache.get(ev.sourceUid);
+        }
+
+        // Source anhand UID holen
+        const source = this._registry.ref_source(ev.sourceUid);
+        if (!source) {
+            global.logError(
+                `${this._uuid}: EDS source not found: ${ev.sourceUid}`
+            );
+            return null;
+        }
+
+        // Schreibbarkeit prüfen (GJS-kompatibel!)
+        const writable =
+            source.has_extension(EDataServer.SOURCE_EXTENSION_CALENDAR) &&
+            !source.get_readonly();
+
+        if (!writable) {
+            global.logError(
+                `${this._uuid}: Calendar source is read-only: ${ev.sourceUid}`
+            );
+            return null;
+        }
+
+        // Client synchron verbinden
+        const client = ECal.Client.new_sync(
+            source,
+            ECal.ClientSourceType.EVENTS,
+            null
+        );
+
+        if (!client) {
+            global.logError(
+                `${this._uuid}: Failed to create ECal.Client for ${ev.sourceUid}`
+            );
+            return null;
+        }
+
+        // Cache
+        this._clientCache.set(ev.sourceUid, client);
+        return client;
+
+    } catch (e) {
+        global.logError(
+            `${this._uuid}: resolveClientForEvent failed: ${e}`
+        );
+        return null;
+    }
+} 
+
+
+
+    // cinnamon_calendar_server couldn't sav events
+    // above const ECal = imports.gi.ECal; and const ICal = imports.gi.ICalGLib;
+    /**
+     * Adds an event directly to the Evolution Data Server (EDS).
+     * * RATIONALE FOR PR:
+     * The standard 'Cinnamon.CalendarServer' is read-only via DBus. To allow 
+     * adding events without modifying system-files or requiring external tools, 
+     * we interface directly with 'libecal' and 'libedataserver' (EDS). 
+     * This ensures the event is synced with Evolution, Google Calendar, etc.
+     */
+     public addEvent(ev: EventData): void {
+    try {
+        const registry = EDataServer.SourceRegistry.new_sync(null);
+        const sources = registry.list_sources(
+            EDataServer.SOURCE_EXTENSION_CALENDAR
+        );
+
+        const tryNextSource = (index: number) => {
+            if (index >= sources.length) {
+                global.logError(
+                    `${this._uuid}: No writable EDS calendar found`
+                );
+                return;
+            }
+
+            const source = sources[index];
+
+            ECal.Client.connect(
+                source,
+                ECal.ClientSourceType.EVENTS,
+                30,
+                null,
+                (_: any, res: any) => {
+                    let client: any;
+
+                    try {
+                        client = ECal.Client.connect_finish(res);
+                    } catch {
+                        tryNextSource(index + 1);
+                        return;
+                    }
+
+                    const caps = client.get_capabilities();
+                    if (!caps.includes(ECal.ClientCapability.CREATE_OBJECTS)) {
+                        tryNextSource(index + 1);
+                        return;
+                    }
+
+                    /* ====================================================
+                     * VEVENT erzeugen
+                     * ==================================================== */
+                    const comp = ICal.Component.new(
+                        ICal.ComponentKind.VEVENT_COMPONENT
+                    );
+
+                    comp.set_summary(ev.summary);
+                    if (ev.description) {
+                        comp.set_description(ev.description);
+                    }
+
+                    const tz = ICal.Timezone.get_utc_timezone();
+
+                    const start = ICal.Time.new_from_timet_with_zone(
+                        Math.floor(ev.start.getTime() / 1000),
+                        ev.isFullDay ? 1 : 0,
+                        tz
+                    );
+
+                    const end = ICal.Time.new_from_timet_with_zone(
+                        Math.floor(ev.end.getTime() / 1000),
+                        ev.isFullDay ? 1 : 0,
+                        tz
+                    );
+
+                    comp.set_dtstart(
+                        ICal.ComponentDateTime.new(start, tz.get_tzid())
+                    );
+                    comp.set_dtend(
+                        ICal.ComponentDateTime.new(end, tz.get_tzid())
+                    );
+
+                    if (ev.id) comp.set_uid(ev.id);
+
+                    client.create_object(comp, null, (_c: any, r: any) => {
+                        try {
+                            const [success, uid] =
+                                client.create_object_finish(r);
+                            if (success) {
+                                global.log(
+                                    `${this._uuid}: Event created in EDS (${uid})`
+                                );
+                            }
+                        } catch (e) {
+                            global.logError(
+                                `${this._uuid}: create_object failed: ${e}`
+                            );
+                        }
+                    });
+                }
+            );
+        };
+
+        tryNextSource(0);
+    } catch (e) {
+        global.logError(`${this._uuid}: addEvent failed: ${e}`);
+    }
+}
+
+ 
 
     /**
      * ICS IMPORT LOGIC

@@ -29,6 +29,8 @@ const Main = imports.ui.main;
 const Util = imports.misc.util;
 const FileUtils = imports.misc.fileUtils;
 const Gettext = imports.gettext;
+const Gtk = imports.gi.Gtk;
+const Gio = imports.gi.Gio;
 
 /* === Module Imports === */
 import { EventManager } from './EventManager';
@@ -180,211 +182,262 @@ class UniversalCalendarApplet extends Applet.TextIconApplet {
     		}
 	     });
 
-            /**
-             * FOOTER SECTION: Buttons for system and calendar management.
-             */
-            let footerBox = new St.BoxLayout({ style_class: 'calendar-footer' });
+	            /**
+	             * FOOTER SECTION: Buttons for system and calendar management.
+	             */
+	            let footerBox = new St.BoxLayout({ style_class: 'calendar-footer' });
             
-            let settingsBtn = new St.Button({
-                label: _("Date and Time Settings"),
-                style_class: 'calendar-footer-button',
-                x_expand: true
-            });
-            settingsBtn.connect("clicked", () => {
-                this.menu.close();
-                Util.spawnCommandLine("cinnamon-settings calendar");
-            });
+	            let settingsBtn = new St.Button({
+	                label: _("Date and Time Settings"),
+	                style_class: 'calendar-footer-button',
+	                x_expand: true
+	            });
+	            settingsBtn.connect("clicked", () => {
+	                this.menu.close();
+	                Util.spawnCommandLine("cinnamon-settings calendar");
+	            });
 
-            let calendarBtn = new St.Button({
-                label: _("Manage Calendars"),
-                style_class: 'calendar-footer-button',
-                x_expand: true
-            });
-            calendarBtn.connect("clicked", () => {
-                this.menu.close();
-                Util.spawnCommandLine("gnome-calendar");
-            });
+	            let calendarBtn = new St.Button({
+	                label: _("Manage Calendars"),
+	                style_class: 'calendar-footer-button',
+	                x_expand: true
+	            });
+	            calendarBtn.connect("clicked", () => {
+		    this.menu.close();
 
-            footerBox.add_actor(settingsBtn);
-            footerBox.add_actor(calendarBtn);
+		    const currentDate = this.CalendarView.getCurrentlyDisplayedDate();
+		    const epoch = Math.floor(currentDate.getTime() / 1000);
 
-            /**
-             * LAYOUT COMPOSITION:
-             * Here we nest the elements to preserve the legacy design while 
-             * preparing for the event list on the left.
-             */
+		    // Wir nutzen den absolut neutralen XDG-Weg. 
+		    // Wir versuchen nicht, eine App zu starten, sondern senden einen 
+		    // Befehl an die Desktop-Umgebung, das Kalender-Modul zu öffnen.
+		    try {
+		            // Dieser Befehl öffnet in Cinnamon die bevorzugte Anwen
+	        		Util.spawnCommandLine(`xdg-open calendar:///?startdate=${epoch}`);
+	        	    } catch (e) {
+	        	    // Falls das System kein URI-Handling für calendar:// hat
+	       			Util.spawnCommandLine(`gnome-calendar --date=${epoch}`);
+	    		}
+		    });
+
+	            footerBox.add_actor(settingsBtn);
+	            footerBox.add_actor(calendarBtn);
+
+	            /**
+	             * LAYOUT COMPOSITION:
+	             * Here we nest the elements to preserve the legacy design while 
+	             * preparing for the event list on the left.
+	             */
             
-            // 1. Create the right-hand column (The "Classic" view)
-            let rightColumn = new St.BoxLayout({
-                vertical: true,
-                style_class: 'calendar-right-column' // Optional for CSS fine-tuning
-            });
-            rightColumn.add_actor(headerBox);
-            rightColumn.add_actor(this.CalendarView.actor);
-            rightColumn.add_actor(footerBox);
+	            // 1. Create the right-hand column (The "Classic" view)
+	            let rightColumn = new St.BoxLayout({
+	                vertical: true,
+	                style_class: 'calendar-right-column' // Optional for CSS fine-tuning
+	            });
+	            rightColumn.add_actor(headerBox);
+	            rightColumn.add_actor(this.CalendarView.actor);
+	            rightColumn.add_actor(footerBox);
 
-            // 2. Create the horizontal bridge
-            this._contentLayout = new St.BoxLayout({
-                vertical: false, // SIDE-BY-SIDE
-                style_class: 'calendar-content-layout'
-            });
+	            // 2. Create the horizontal bridge
+	            this._contentLayout = new St.BoxLayout({
+	                vertical: false, // SIDE-BY-SIDE
+	                style_class: 'calendar-content-layout'
+	            });
 
-            // 3. Add Left Wing (Events) and Right Column (Calendar)
-            this._contentLayout.add_actor(this.eventListView.actor);
-            this._contentLayout.add_actor(rightColumn);
+	            // 3. Add Left Wing (Events) and Right Column (Calendar)
+	            this._contentLayout.add_actor(this.eventListView.actor);
+	            this._contentLayout.add_actor(rightColumn);
 
-            // 4. Final Assembly
-            this._mainBox.add_actor(this._contentLayout);
-            this.menu.addActor(this._mainBox);
+	            // 4. Final Assembly
+	            this._mainBox.add_actor(this._contentLayout);
+	            this.menu.addActor(this._mainBox);
 
-            // --- UI CONSTRUCTION END ---
+	            // --- UI CONSTRUCTION END ---
 
-            this.on_settings_changed();
-            this.on_hotkey_changed();
+	            this.on_settings_changed();
+	            this.on_hotkey_changed();
 
-            this.menu.connect("open-state-changed", (menu: any, isOpen: boolean) => {
-                if (isOpen) {
-                    this.CalendarView.render();
-                    this.setHeaderDate(new Date());
-                    GLib.timeout_add(GLib.PRIORITY_DEFAULT, 50, () => {
-                        this.CalendarView.actor.grab_key_focus();
-                        return false;
-                    });
-                }
-            });
+	            this.menu.connect("open-state-changed", (menu: any, isOpen: boolean) => {
+	                if (isOpen) {
+	                    this.CalendarView.render();
+	                    this.setHeaderDate(new Date());
+	                    GLib.timeout_add(GLib.PRIORITY_DEFAULT, 50, () => {
+	                        this.CalendarView.actor.grab_key_focus();
+	                        return false;
+	                    });
+	                }
+	            });
 
-            this.update_label_and_tooltip();
-            this._updateId = GLib.timeout_add_seconds(GLib.PRIORITY_DEFAULT, 10, () => {
-                this.update_label_and_tooltip();
-                return true;
-            });
+	            this.update_label_and_tooltip();
+	            this._updateId = GLib.timeout_add_seconds(GLib.PRIORITY_DEFAULT, 10, () => {
+	                this.update_label_and_tooltip();
+	                return true;
+	            });
 
-        } catch (e) {
-            global.log(`[${this.uuid}] CRITICAL: Initialization failed: ${e}`);
-        }
-    }
+	        } catch (e) {
+	            global.log(`[${this.uuid}] CRITICAL: Initialization failed: ${e}`);
+	        }
+	    }
 
-   /**
-     * Unified handler for settings changes.
-     * Manages Icon visibility and UI re-rendering.
-     */
+	   /**
+	     * Unified handler for settings changes.
+	     * Manages Icon visibility and UI re-rendering.
+	     */
  
 
-    on_settings_changed() {
-        // Toggle Panel Icon visibility
-        if (this.showIcon) {
-            this.set_applet_icon_name("office-calendar");
-            if (this._applet_icon_box) this._applet_icon_box.show();
-        } else {
-            this._hide_icon();
-        }
+	    on_settings_changed() {
+	        // Toggle Panel Icon visibility
+	        if (this.showIcon) {
+	            this.set_applet_icon_name("office-calendar");
+	            if (this._applet_icon_box) this._applet_icon_box.show();
+		        } else {
+		            this._hide_icon();
+		        }
+	
+	        // Handle Event View Visibility (The left wing)
+	        if (this.eventListView) {
+	            if (this.showEvents) {
+	                this.eventListView.actor.show();
+	            } else {
+	                this.eventListView.actor.hide();
+	            }
+	        }
+	
+	        this.update_label_and_tooltip();
+	        // If the menu is open, we need to re-render to reflect format changes
+	        if (this.menu && this.menu.isOpen) {
+	            this.CalendarView.render();
+	        }
+	    }
+	
+	    /**
+	     * Helper to cleanly remove the icon from the panel.
+	     * Different Cinnamon versions handle empty icons differently; this ensures it's hidden.
+	     */
 
-        // Handle Event View Visibility (The left wing)
-        if (this.eventListView) {
-            if (this.showEvents) {
-                this.eventListView.actor.show();
-            } else {
-                this.eventListView.actor.hide();
-            }
-        }
 
-        this.update_label_and_tooltip();
-        // If the menu is open, we need to re-render to reflect format changes
-        if (this.menu && this.menu.isOpen) {
-            this.CalendarView.render();
-        }
-    }
+	    _hide_icon() {
+	        this.set_applet_icon_name("");
+	        if (this._applet_icon_box) {
+	            this._applet_icon_box.hide();
+	        }
+	    }
 
-    /**
-     * Helper to cleanly remove the icon from the panel.
-     * Different Cinnamon versions handle empty icons differently; this ensures it's hidden.
-     */
+	    /**
+	     * Triggered when user clicks the panel applet.
+	     */
 
+	    on_applet_clicked(event: any): void {
+	        if (!this.menu.isOpen) {
+	            this.eventManager.refresh();
+	        }
+	        this.menu.toggle();
+	    }
 
-    _hide_icon() {
-        this.set_applet_icon_name("");
-        if (this._applet_icon_box) {
-            this._applet_icon_box.hide();
-        }
-    }
+	    /**
+	     * Updates the global hotkey based on user settings.
+	     */
 
-    /**
-     * Triggered when user clicks the panel applet.
-     */
+	    on_hotkey_changed() {
+	        Main.keybindingManager.removeHotKey(`${this.uuid}-open`);
+	        if (this.keyOpen) {
+	            Main.keybindingManager.addHotKey(`${this.uuid}-open`, this.keyOpen, () => {
+	                this.on_applet_clicked(null);
+	            });
+	        }
+	    }
 
-    on_applet_clicked(event: any): void {
-        if (!this.menu.isOpen) {
-            this.eventManager.refresh();
-        }
-        this.menu.toggle();
-    }
-
-    /**
-     * Updates the global hotkey based on user settings.
-     */
-
-    on_hotkey_changed() {
-        Main.keybindingManager.removeHotKey(`${this.uuid}-open`);
-        if (this.keyOpen) {
-            Main.keybindingManager.addHotKey(`${this.uuid}-open`, this.keyOpen, () => {
-                this.on_applet_clicked(null);
-            });
-        }
-    }
-
-   /**
-     * Core Panel Logic:
-     * Sets the text (Clock) displayed on the Cinnamon panel and its tooltip.
-     * Supports both system locale and user-defined custom formats.
-     */
+	   /**
+	     * Core Panel Logic:
+	     * Sets the text (Clock) displayed on the Cinnamon panel and its tooltip.
+	     * Supports both system locale and user-defined custom formats.
+	     */
  
 
-    update_label_and_tooltip() {
-        const now = new Date();
-        const gNow = GLib.DateTime.new_now_local();
+	    update_label_and_tooltip() {
+	        const now = new Date();
+	        const gNow = GLib.DateTime.new_now_local();
         
-        let timeLabel = this.useCustomFormat ? gNow.format(this.customFormat) : 
-                        now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-        
-        let dateTooltip = this.useCustomFormat ? gNow.format(this.customTooltipFormat) : 
-                          now.toLocaleDateString([], { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+	        let timeLabel = this.useCustomFormat ? gNow.format(this.customFormat) : 
+	                        now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+	        
+	        let dateTooltip = this.useCustomFormat ? gNow.format(this.customTooltipFormat) : 
+	                          now.toLocaleDateString([], { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+	
+	        this.set_applet_label(timeLabel || "");
+	        this.set_applet_tooltip(dateTooltip || "");
+	    }
 
-        this.set_applet_label(timeLabel || "");
-        this.set_applet_tooltip(dateTooltip || "");
-    }
+	     /**
+	     * Updates the UI Header inside the popup menu.
+	     * Shows Day, Date, and specific holiday descriptions if available.
+	     */
 
-     /**
-     * Updates the UI Header inside the popup menu.
-     * Shows Day, Date, and specific holiday descriptions if available.
-     */
+	    public setHeaderDate(date: Date) {
+	        if (!this._dayLabel || !this.CalendarView) return;
+	        const gDate = GLib.DateTime.new_from_unix_local(date.getTime() / 1000);
+	        
+	        this._dayLabel.set_text(gDate.format("%A"));
+	        this._dateLabel.set_text(gDate.format("%e. %B %Y"));
+	
+	        const tagInfo = this.CalendarView.getHolidayForDate(date);
+	        if (tagInfo && tagInfo.beschreibung) {
+	            this._holidayLabel.set_text(tagInfo.beschreibung);
+	            this._holidayLabel.show();
+	        } else {
+	            this._holidayLabel.hide();
+	        }
+	    }
+	
+	     /**
+	     * Cleanup: Called when applet is removed or Cinnamon restarts.
+	     * Essential to prevent memory leaks and dangling signals/hotkeys.
+	     */
+	    on_applet_removed_from_panel() {
+	        Main.keybindingManager.removeHotKey(`${this.uuid}-open`);
+	        if (this._updateId > 0) {
+	            GLib.source_remove(this._updateId);
+	        }
+	        this.menu.destroy();
+	    }
 
-    public setHeaderDate(date: Date) {
-        if (!this._dayLabel || !this.CalendarView) return;
-        const gDate = GLib.DateTime.new_from_unix_local(date.getTime() / 1000);
-        
-        this._dayLabel.set_text(gDate.format("%A"));
-        this._dateLabel.set_text(gDate.format("%e. %B %Y"));
+	    private _openICSFileChooser(): void {
+	    const dialog = new Gtk.FileChooserDialog({
+	        title: _("Import Calendar (.ics)"),
+	        action: Gtk.FileChooserAction.OPEN,
+	        modal: true,
+	    });
+	
+	    dialog.add_button(_("Cancel"), Gtk.ResponseType.CANCEL);
+	    dialog.add_button(_("Import"), Gtk.ResponseType.OK);
+	
+	    const filter = new Gtk.FileFilter();
+	    filter.set_name("iCalendar (*.ics)");
+	    filter.add_pattern("*.ics");
+	    dialog.add_filter(filter);
 
-        const tagInfo = this.CalendarView.getHolidayForDate(date);
-        if (tagInfo && tagInfo.beschreibung) {
-            this._holidayLabel.set_text(tagInfo.beschreibung);
-            this._holidayLabel.show();
-        } else {
-            this._holidayLabel.hide();
-        }
-    }
+	    dialog.connect("response", (_dlg: any, response: number) => {
+	        if (response === Gtk.ResponseType.OK) {
+	            const file = dialog.get_file();
+	            if (file) {
+	                const path = file.get_path();
+	                if (path) {
+	                    this.eventManager.importICSFile(path)
+	                        .catch(e => {
+	                            global.logError(
+	                                `${this._uuid}: ICS import failed: ${e}`
+	                            );
+	                        });
+	                }
+	            }
+	        }
+	        dialog.destroy();
+	    });
 
-     /**
-     * Cleanup: Called when applet is removed or Cinnamon restarts.
-     * Essential to prevent memory leaks and dangling signals/hotkeys.
-     */
-    on_applet_removed_from_panel() {
-        Main.keybindingManager.removeHotKey(`${this.uuid}-open`);
-        if (this._updateId > 0) {
-            GLib.source_remove(this._updateId);
-        }
-        this.menu.destroy();
-    }
+	    dialog.show_all();
+	}
+    
+    
 }
 
 /**

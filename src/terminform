@@ -1,0 +1,80 @@
+private createTerminForm(
+    date: Date,
+    aktuelleTermine: EventData[]
+): any {
+
+    const box = new St.BoxLayout({
+        vertical: true,
+        style_class: "termin-form",
+        x_expand: true
+    });
+
+    /* === Hidden UID (intern) === */
+    let currentUid: string | null = null;
+
+    /* === Title === */
+    const titleEntry = new St.Entry({
+        hint_text: _("What? (e.g. Dentist)"),
+        style_class: "termin-input"
+    });
+
+    /* === Time inputs === */
+    const startEntry = new St.Entry({
+        text: this._getCurrentTime(),
+        style_class: "termin-time"
+    });
+
+    const endEntry = new St.Entry({
+        text: this._calculateDefaultEnd(startEntry.get_text()),
+        style_class: "termin-time"
+    });
+
+    startEntry.clutter_text.connect("text-changed", () => {
+        endEntry.set_text(
+            this._calculateDefaultEnd(startEntry.get_text())
+        );
+    });
+
+    /* === Description === */
+    const descEntry = new St.Entry({
+        hint_text: _("Details / Description…"),
+        style_class: "termin-desc",
+        x_expand: true
+    });
+    descEntry.clutter_text.set_single_line_mode(false);
+    descEntry.clutter_text.set_max_length(500);
+
+    /* === Save Button === */
+    const saveBtn = new St.Button({
+        label: _("Save event"),
+        style_class: "calendar-event-button"
+    });
+
+    saveBtn.connect("clicked", async () => {
+        const title = titleEntry.get_text().trim();
+        if (!title) {
+            global.log("No title entered");
+            return;
+        }
+
+        const uid = currentUid ?? `local_${GLib.get_monotonic_time()}`;
+
+        const start = this._buildDateTime(date, startEntry.get_text());
+        const end = this._buildDateTime(date, endEntry.get_text());
+
+        await this.applet.eventManager.addEvent({
+            id: uid,
+            summary: title,
+            description: descEntry.get_text(),
+            start,
+            end,
+            color: "#3498db",
+            isFullDay: false
+        });
+
+        this.applet.eventManager.refresh();
+    });
+
+    box.add(titleEntry, startEntry, endEntry, descEntry, saveBtn);
+    return box;
+}

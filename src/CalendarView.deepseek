@@ -112,7 +112,6 @@ export class CalendarView {
 
     private dayMode: "VIEW" | "ADD" | "EDIT" = "VIEW";
     private editingEvent: any | null = null;
-    private dayModeDate: Date | null = null; 
 
     private readonly LOCALE = undefined;
 
@@ -790,159 +789,140 @@ export class CalendarView {
 	    this.contentBox.add_actor(box);
 	}
 
-    /* ===========================================================
-     * Create Form - edit and add events
-     * =========================================================== */
-    private createTerminForm(date: Date, editingEvent?: any): any {
-        const box = new St.BoxLayout({
-            vertical: true,
-            style_class: "calendar-main-box", // Consistent with your applet.js
-            x_expand: true
-        });
+	private createTerminForm(date: Date, editingEvent?: any): any {
+	    const box = new St.BoxLayout({
+	        vertical: true,
+	        style_class: "termin-form",
+	        x_expand: true
+	    });
+	
+	    /* === CREATE FORM Title === */
+	    const titleEntry = new St.Entry({
+	        hint_text: _("What? (e.g. Dentist)"),
+	        style_class: "termin-input",
+	        text: editingEvent ? editingEvent.summary : ""
+	    });
+	
+	    /* === Time inputs === */
+	    const startEntry = new St.Entry({
+	        text: editingEvent ? this._formatTimeForInput(editingEvent.start) : this._getCurrentTime(),
+	        style_class: "termin-time"
+	    });
+	
+	    const endEntry = new St.Entry({
+	        text: editingEvent ? this._formatTimeForInput(editingEvent.end) : this._calculateDefaultEnd(startEntry.get_text()),
+	        style_class: "termin-time"
+	    });
+	
+	    startEntry.clutter_text.connect("text-changed", () => {
+	        endEntry.set_text(
+	            this._calculateDefaultEnd(startEntry.get_text())
+	        );
+	    });
+	
+	    /* === Description === */
+	    const descEntry = new St.Entry({
+	        hint_text: _("Details / Description…"),
+	        style_class: "termin-desc",
+	        x_expand: true,
+	        text: editingEvent ? editingEvent.description : ""
+	    });
+	    descEntry.clutter_text.set_single_line_mode(false);
+	
+	    /* === Button Box === */
+	    const buttonBox = new St.BoxLayout({
+	        style_class: "termin-form-buttons"
+	    });
+	
+	    /* === Save Button === */
+	    const saveBtn = new St.Button({
+	        label: _("Save event"),
+	        style_class: "calendar-event-button"
+	    });
+	
+	    saveBtn.connect("clicked", async () => {
+	        const title = titleEntry.get_text().trim();
+	        if (!title) return;
+	
+	        const start = this._buildDateTime(date, startEntry.get_text());
+	        const end   = this._buildDateTime(date, endEntry.get_text());
+	
+	        if (editingEvent) {
+            // Event aktualisieren
+	            await this.applet.eventManager.updateEvent(editingEvent.id, {
+	                summary: title,
+	                description: descEntry.get_text(),
+	                start,
+	                end,
+	                isFullDay: false
+	            });
+	        } else {
+            // Neues Event hinzufügen
+	            await this.applet.eventManager.addEvent({
+	                summary: title,
+	                description: descEntry.get_text(),
+	                start,
+	                end,
+	                isFullDay: false
+	            });
+	        }
+	
+	        //  Immer zurück zu VIEW
+	        this.dayMode = "VIEW";
+        	this.editingEvent = null;
+        	this.dayModeDate = null;
+        	this.render();
+	    });
 
-        // 1. Determine ID: Use existing or generate unique ID for new events
-        const currentId = editingEvent ? editingEvent.id : 
-            (Math.random().toString(36).substring(2) + Date.now().toString(36));
+	    /* === Cancel Button === */
+	    const cancelBtn = new St.Button({
+	        label: _("Cancel"),
+	        style_class: "calendar-event-button"
+	    });
 
-        /* === Title Entry === */
-        const titleEntry = new St.Entry({
-            // msgid "What?" is common in Cinnamon. "Nice event" as fall-through.
-            hint_text: editingEvent ? editingEvent.summary : _("What? (Nice event)"),
-            style_class: "calendar-event-summary", // Reusing your summary style
-            text: editingEvent ? editingEvent.summary : ""
-        });
+	    cancelBtn.connect("clicked", () => {
+	        // 🔄 Immer zurück zu VIEW
+	        this.dayMode = "VIEW";
+	        this.editingEvent = null;
+	        this.dayModeDate = null;
+	        this.render();
+	    });
 
-        /* === Time Inputs === */
-        // Helper to format Date objects to HH:MM
-        const formatTime = (d: Date) => {
-            return `${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}`;
-        };
+	    /* === Delete Button (nur beim Editieren) === */
+	    if (editingEvent) {
+	        const deleteBtn = new St.Button({
+	            label: _("Delete"),
+	            style_class: "calendar-event-button delete-button"
+	        });
+	
+	        deleteBtn.connect("clicked", async () => {
+	            await this.applet.eventManager.deleteEvent(editingEvent.id);
+	            // 🔄 Immer zurück zu VIEW
+	            this.dayMode = "VIEW";
+	            this.editingEvent = null;
+	            this.dayModeDate = null;
+	            this.render();
+	        });
+	        
+	        buttonBox.add_actor(deleteBtn);
+	    }
 
-        const startTimeStr = editingEvent ? formatTime(editingEvent.start) : this._getCurrentTime();
-        const endTimeStr = editingEvent ? formatTime(editingEvent.end) : this._calculateDefaultEnd(startTimeStr);
+	    buttonBox.add_actor(cancelBtn);
+	    buttonBox.add_actor(saveBtn);
+	    
+	    box.add(titleEntry, startEntry, endEntry, descEntry, buttonBox);
+	    return box;
+	}
 
-        const startEntry = new St.Entry({
-            text: startTimeStr,
-            style_class: "calendar-event-time-present"
-        });
+	// Hilfsmethode für Zeitformatierung
+	private _formatTimeForInput(date: Date): string {
+	    return date.toLocaleTimeString(this.LOCALE, {
+	        hour: "2-digit",
+	        minute: "2-digit",
+	        hour12: false
+	    }).replace(/^24:/, "00:");
+	}
 
-        const endEntry = new St.Entry({
-            text: endTimeStr,
-            style_class: "calendar-event-time-present"
-        });
-
-        // Sync end time when start time changes (only for new events)
-        if (!editingEvent) {
-            startEntry.clutter_text.connect("text-changed", () => {
-                endEntry.set_text(this._calculateDefaultEnd(startEntry.get_text()));
-            });
-        }
-
-        /* === Description Entry === */
-        const descEntry = new St.Entry({
-            // msgid "Description" is a standard Cinnamon string
-            hint_text: editingEvent ? (editingEvent.description || _("Description")) : _("Description"),
-            style_class: "calendar-event-row-content", 
-            x_expand: true,
-            text: editingEvent ? (editingEvent.description || "") : ""
-        });
-        descEntry.clutter_text.set_single_line_mode(false);
-
-        /* === Button Row === */
-        const buttonBox = new St.BoxLayout({
-            style: "margin-top: 10px;",
-            x_expand: true
-        });
-
-        /* === Save/Update Button === */
-        const saveBtn = new St.Button({
-            // msgid "Update" and "Save" are standard Cinnamon
-            label: editingEvent ? _("Update") : _("Save"),
-            style_class: "calendar-event-button",
-            x_expand: true
-        });
-
- 
-        /* === Save Button Logic === */
-        saveBtn.connect("clicked", () => {
-            const title = titleEntry.get_text().trim();
-            if (!title) return;
-
-            // Debug-Log um zu sehen, was wir abschicken
-            global.log(`[CalendarApplet] Saving: ${currentId} - ${title}`);
-
-            const start = this._buildDateTime(date, startEntry.get_text());
-            const end = this._buildDateTime(date, endEntry.get_text());
-
-            try {
-                // WICHTIG: Alle Felder übergeben, die addEvent(ev: EventData) erwartet!
-                this.applet.eventManager.addEvent({
-                    id: currentId,
-                    summary: title,
-                    description: descEntry.get_text() || "",
-                    start: start,
-                    end: end,
-                    isFullDay: false,
-                    color: editingEvent ? editingEvent.color : "#3498db"
-                });
-
-                // UI sofort umschalten (Optimistic UI)
-                this.dayMode = "VIEW";
-                this.editingEvent = null;
-                this.dayModeDate = null;
-                this.render();
-            } catch (err) {
-                global.logError("[CalendarApplet] Save Error: " + err);
-            }
-        });
-
-        /* === Cancel Button === */
-        const cancelBtn = new St.Button({
-            label: _("Cancel"), // Standard msgid
-            style_class: "calendar-event-button",
-            x_expand: true
-        });
-
-        cancelBtn.connect("clicked", () => {
-            this.dayMode = "VIEW";
-            this.editingEvent = null;
-            this.render();
-        });
-
-        // Add Actors to the main box
-        box.add_actor(titleEntry);
-        
-        const timeBox = new St.BoxLayout();
-        timeBox.add_actor(startEntry);
-        timeBox.add_actor(endEntry);
-        box.add_actor(timeBox);
-        
-        box.add_actor(descEntry);
-
-        // Layout Buttons
-        buttonBox.add_actor(cancelBtn);
-        buttonBox.add_actor(saveBtn);
-
-        /* === Delete Button (Optional - only in Edit Mode) === */
-        if (editingEvent) {
-            const deleteBtn = new St.Button({
-                label: _("Delete"), // Standard msgid
-                style_class: "calendar-event-button",
-                style: "color: #ff5555;" // Simple red tint for delete
-            });
-
-            deleteBtn.connect("clicked", () => {
-                this.applet.eventManager.deleteEvent(editingEvent.id);
-                this.dayMode = "VIEW";
-                this.editingEvent = null;
-                this.render();
-            });
-            buttonBox.add_actor(deleteBtn);
-        }
-
-        box.add_actor(buttonBox);
-        return box;
-    }
 
 
     /* ============================================================
