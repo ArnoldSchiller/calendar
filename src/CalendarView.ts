@@ -186,6 +186,8 @@ export class CalendarView {
         this.displayedYear = today.getFullYear();
         this.displayedMonth = today.getMonth();
         this.currentView = "MONTH";
+	const todayEvents = this.applet.eventManager.getEventsForDate(today);
+        this.applet.eventListView.updateForDate(today, todayEvents);
         this.render();
     }
 
@@ -211,28 +213,38 @@ export class CalendarView {
         this.navBox.destroy_children();
 
         const navContainer = new St.BoxLayout({
-            style_class: "calendar-nav-box",
+            style_class: "calendar",
             x_align: St.Align.MIDDLE,
         });
 
         /* --- Month Selector ------------------------------------ */
 
-        const monthBox = new St.BoxLayout({ style: "margin: 0 10px;" });
+        const monthBox = new St.BoxLayout({ style: "margin-right: 5px;" });
 
         const btnPrevM = new St.Button({
             label: "‹",
             style_class: "calendar-change-month-back",
         });
         btnPrevM.connect("clicked", () => this.scrollMonth(-1));
+       
+        const monthBtn = new St.Button({
+	    label: new Date(this.displayedYear, this.displayedMonth).toLocaleString(this.LOCALE, { month: "long" }),
+	    style_class: "calendar-month-label",		
+	    reactive: true,
+	    x_expand: true,
+	    x_fill: true,
+	    // Wir erzwingen Transparenz und entfernen das Padding des System-Buttons
+	    style: "padding: 2px 0; background-color: transparent; border: none; min-width: 140px; text-align: center;"
+	});
 
-        const monthLabel = new St.Label({
-            text: new Date(
-                this.displayedYear,
-                this.displayedMonth
-            ).toLocaleString(this.LOCALE, { month: "long" }),
-            style_class: "calendar-month-label",
-            style: "min-width: 100px; text-align: center;",
+
+        monthBtn.connect("clicked", () => {
+            this.currentView = "MONTH";
+            this.render();
         });
+
+
+
 
         const btnNextM = new St.Button({
             label: "›",
@@ -241,13 +253,26 @@ export class CalendarView {
         btnNextM.connect("clicked", () => this.scrollMonth(1));
 
         monthBox.add_actor(btnPrevM);
-        monthBox.add_actor(monthLabel);
+        monthBox.add_actor(monthBtn);
         monthBox.add_actor(btnNextM);
 
+	/* --- Middle Box -----------------------------------------*/
+        const middleBox = new St.BoxLayout({
+            x_expand: true,
+        });
+	/* future use for messages or something like that */
+        const middleLabel = new St.Label({
+            text: "\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0" ,
+            style_class: "calendar-month-label",
+            style: "min-width: 50px; text-align: center;",
+        });
+          
+        middleBox.add_actor(middleLabel);
+        
         /* --- Year Selector ------------------------------------- */
 
         const yearBox = new St.BoxLayout({
-            style: "margin: 0 10px; margin-left: 20px;",
+            style: "margin-left: 5px;",
         });
 
         const btnPrevY = new St.Button({
@@ -259,6 +284,7 @@ export class CalendarView {
         const yearBtn = new St.Button({
             label: this.displayedYear.toString(),
             style_class: "calendar-month-label",
+            x_expand: true,
             reactive: true,
         });
         yearBtn.connect("clicked", () => {
@@ -277,6 +303,7 @@ export class CalendarView {
         yearBox.add_actor(btnNextY);
 
         navContainer.add_actor(monthBox);
+	navContainer.add_actor(middleBox);
         navContainer.add_actor(yearBox);
         this.navBox.add_actor(navContainer);
     }
