@@ -166,6 +166,20 @@ class UniversalCalendarApplet extends Applet.TextIconApplet {
              */
             this.CalendarView = new CalendarModule.CalendarView(this);
 
+	    // --- SIGNAL CONNECTION ---
+	    // We connect the ‘event-clicked’ signal of the list to the calendar.
+            // Since we used interface merging in EventListView.ts,
+            // TS accepts the call to .connect() here.
+	    this.eventListView.connect('event-clicked', (actor: any, ev: any) => {
+    		if (ev && ev.start) {
+        	// 1. Kalender-Gitter auf den Tag des Events umstellen
+        	this.CalendarView.jumpToDate(ev.start);
+
+        	// 2. Den Header (Oben rechts) auf das Datum des Events aktualisieren
+        	this.setHeaderDate(ev.start);
+    		}
+	     });
+
             /**
              * FOOTER SECTION: Buttons for system and calendar management.
              */

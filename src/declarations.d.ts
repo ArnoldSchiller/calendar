@@ -48,3 +48,31 @@ declare namespace imports.misc.util {}
 declare namespace imports.misc.fileUtils {}
 declare namespace imports.gettext {}
 
+
+/* ---------- App-spezifische Typen ---------- */
+declare interface EventData {
+    id: string;
+    start: Date;
+    end: Date;
+    summary: string;
+    description?: string;
+    color: string;
+    isFullDay: boolean;
+}
+
+declare interface DateRange {
+    from: Date;
+    to: Date;
+}
+
+
+declare interface Holiday {
+    k: string;    // Key type: 'f' (fixed), 'e' (easter-based), 'r' (relative)
+    d?: number;   // Day of month
+    m?: number;   // Month of year
+    o?: number;   // Offset in days (usually for easter, e.g., -2 for Good Friday)
+    n: string;    // Name/Description of the holiday
+    p: boolean;   // Public: true if statutory holiday, false if observance
+    c?: string;   // Condition string (e.g., "year<=1994")
+}
+

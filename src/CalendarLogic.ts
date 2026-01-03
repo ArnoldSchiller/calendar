@@ -13,6 +13,19 @@
  * * 3. TYPE SAFETY:
  * Imports types from CalendarDay.ts. Note that in 'None' mode, 
  * these imports are purely for the compiler and emit no JS code.
+ * * ARCHITECTURE OVERVIEW:
+ * 1. EventManager: Handles data fetching (ICS/Evolution/System).
+ * 2. CalendarLogic: Pure JS logic for date calculations and holiday parsing.
+ * 3. CalendarView: The complex St.Table based UI grid.
+ * 4. EventListView: Specialized view for displaying event details.
+ * * * SYSTEM INTEGRATION:
+ * - Uses 'Settings' for user-defined date formats and behavior.
+ * - Uses 'AppletPopupMenu' to host the calendar UI.
+ * - Uses 'KeybindingManager' for global hotkey support.
+ * * @author Arnold Schiller <calendar@projektit.de>
+ * @link https://github.com/ArnoldSchiller/calendar
+ * @link https://projektit.de/kalender
+ * @license GPL-3.0-or-later
  */
 
 import { CalendarDay, DayType } from './CalendarDay';
