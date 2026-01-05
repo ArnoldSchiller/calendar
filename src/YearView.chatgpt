@@ -1,0 +1,213 @@
+    /* ============================================================
+     * YEAR VIEW
+     * ============================================================
+     *
+     * This view provides a high-level overview of an entire year.
+     *
+     * ────────────────────────────────────────────────────────────
+     * PURPOSE OF THE YEAR VIEW
+     * ────────────────────────────────────────────────────────────
+     *
+     * The Year View is intentionally minimalistic.
+     * Its main purpose is NOT to display events directly,
+     * but to act as a fast navigation hub:
+     *
+     *   YEAR  →  MONTH  →  DAY
+     *
+     * In the current architecture, this view allows the user to:
+     * - See all months of the selected year at once
+     * - Quickly jump into a specific month
+     *
+     * It does NOT:
+     * - Render individual days
+     * - Show event dots or counts
+     * - Display mini calendars
+     *
+     * ────────────────────────────────────────────────────────────
+     * DESIGN DECISION (IMPORTANT)
+     * ────────────────────────────────────────────────────────────
+     *
+     * The original design idea included:
+     * - A "mini month grid" for each month
+     * - Possibly event dots per month
+     *
+     * This was deliberately NOT implemented (yet), because:
+     *
+     * 1. Cinnamon applets have strict performance constraints.
+     *    Rendering 12 full mini-calendars would significantly
+     *    increase UI complexity and redraw cost.
+     *
+     * 2. Event data retrieval in Cinnamon is asynchronous and
+     *    limited by the Cinnamon.CalendarServer API.
+     *
+     * 3. There is no clean, officially supported way to request
+     *    aggregated per-month event summaries without fetching
+     *    full event ranges.
+     *
+     * TODO (Future Enhancement):
+     * Implement optional mini month grids per month, but ONLY if:
+     * - EventManager provides cached per-month summaries
+     * - Rendering can be done lazily or on-demand
+     */
+
+    private renderYearView(): void {
+        /* --------------------------------------------------------
+         * ROOT CONTAINER
+         * --------------------------------------------------------
+         *
+         * Vertical layout:
+         * 1. Action area (currently mostly unused)
+         * 2. Month selection grid
+         */
+
+        const yearBox = new St.BoxLayout({
+            vertical: true,
+            style_class: "year-view-container",
+        });
+
+        /* --------------------------------------------------------
+         * ACTION AREA (TOP OF YEAR VIEW)
+         * --------------------------------------------------------
+         *
+         * This area was intended for global year-level actions,
+         * such as importing calendars or bulk operations.
+         *
+         * At the moment it only acts as a spacer.
+         */
+
+        const actionArea = new St.BoxLayout({
+            x_align: St.Align.MIDDLE,
+            style: "padding: 10px;",
+        });
+
+        /* --------------------------------------------------------
+         * ICS IMPORT BUTTON (DISABLED / TODO)
+         * --------------------------------------------------------
+         *
+         * This button is intentionally commented out.
+         *
+         * REASONING:
+         *
+         * While importing ICS files sounds trivial, it is NOT
+         * reliably solvable within the constraints of:
+         *
+         * - Cinnamon.CalendarServer (mostly read-only via DBus)
+         * - Evolution Data Server (EDS) permissions and sources
+         * - GJS / GIR API inconsistencies
+         *
+         * In practice:
+         * - "Modify existing events" often works
+         * - "Create new events" is highly source-dependent
+         * - Bulk ICS imports introduce complex edge cases:
+         *   • missing or duplicate UIDs
+         *   • read-only calendar sources
+         *   • partial failures without rollback
+         *
+         * Therefore, this feature is currently disabled to avoid
+         * misleading users with a broken or unreliable workflow.
+         *
+         * TODO (Architectural):
+         * If ICS import is ever re-enabled, the following must exist:
+         * - A fully robust EventManager.create() implementation
+         * - Proper source resolution and permission checks
+         * - Clear user feedback for partial import failures
+         */
+
+        /*const importBtn = new St.Button({
+            label: _("Import a Calendar"),
+            style_class: "calendar-event-button",
+            x_expand: true,
+        });
+
+        importBtn.connect("clicked", () => {
+            global.log(
+                "[CalendarView] ICS import requested (not yet implemented)"
+            );
+            this.onImportRequested?.();
+        });
+        */
+
+        /* actionArea.add_actor(importBtn); */
+
+        yearBox.add_actor(actionArea);
+
+        /* --------------------------------------------------------
+         * MONTH SELECTION GRID
+         * --------------------------------------------------------
+         *
+         * A simple grid of 12 buttons (3 columns × 4 rows),
+         * each representing one month of the year.
+         *
+         * This grid does NOT depend on event data.
+         */
+
+        const grid = new St.Table({
+            homogeneous: true,
+            style_class: "calendar",
+        });
+
+        /* --------------------------------------------------------
+         * MONTH BUTTON CREATION
+         * --------------------------------------------------------
+         *
+         * We iterate over all 12 months (0–11).
+         *
+         * Each button:
+         * - Displays the localized short month name
+         * - Switches the view to MONTH when clicked
+         */
+
+        for (let m = 0; m < 12; m++) {
+            const btn = new St.Button({
+                label: new Date(
+                    this.displayedYear,
+                    m
+                ).toLocaleString(this.LOCALE, {
+                    month: "short",
+                }),
+                style_class: "calendar-month-label",
+            });
+
+            /* ----------------------------------------------------
+             * CLICK HANDLER
+             * ----------------------------------------------------
+             *
+             * Clicking a month:
+             * - Updates displayedMonth
+             * - Switches view mode to MONTH
+             * - Triggers a full re-render
+             */
+
+            btn.connect("clicked", () => {
+                this.displayedMonth = m;
+                this.currentView = "MONTH";
+                this.render();
+            });
+
+            /* ----------------------------------------------------
+             * GRID POSITIONING
+             * ----------------------------------------------------
+             *
+             * Layout:
+             *   Row = monthIndex / 3
+             *   Col = monthIndex % 3
+             */
+
+            grid.add(btn, {
+                row: Math.floor(m / 3),
+                col: m % 3,
+            });
+        }
+
+        /* --------------------------------------------------------
+         * FINAL ASSEMBLY
+         * --------------------------------------------------------
+         *
+         * Add the month grid to the year container,
+         * then attach everything to the main content box.
+         */
+
+        yearBox.add_actor(grid);
+        this.contentBox.add_actor(yearBox);
+    }
+
