@@ -334,9 +334,25 @@ journalctl -f -o cat /usr/bin/cinnamon 2>&1 | grep -E "calendar@projektit|Calend
 - [ ] **Weather Integration** - Weather forecasts in day view
 
 ### Known Limitations:
-- ICS import requires file dialog implementation
-- Some calendar server features depend on Evolution configuration
-- Regional holiday coverage is currently Europe-focused
+### Updated Known Limitations & Roadmap
+
+#### ⚠️ Technical Limitations (EDS & GJS Bindings)
+
+* **Description Support (New Events):** Due to inconsistencies in the `libecal` GObject-Introspection (GIR) for JavaScript, adding descriptions to *newly created* events is currently disabled. The underlying API expects conflicting data types (Object vs. String) across different system versions, leading to instability and applet crashes.
+* **ICS Import (Status: Shelved):**
+    * **Reason:** The JavaScript bindings for the Evolution Data Server (EDS) are unreliable when handling complex iCalendar objects. While the C-based backend (Evolution/GNOME Calendar) works perfectly, the "bridge" to JavaScript (GJS) often fails to map properties like `DESCRIPTION` or `LOCATION` correctly when creating new objects.
+    * **Impact:** Attempting to import external `.ics` files would lead to frequent crashes. For reliability, this feature has been moved from "Planned" to "Unsupported" until the upstream GJS bindings improve.
+
+#### 🛠 Current Focus
+
+- [x] **Smart Merge:** Modifying existing events works reliably (as it reuses server-side object structures).
+- [x] **Reliable Creation:** New events can be created with titles and correct time/date/all-day logic.
+- [ ] **Additional Holiday Regions:** Expanding beyond Europe.
+- [ ] **Theme Integration:** Improving CSS compatibility with diverse Cinnamon themes.
+
+- ICS import requires file dialog implementation (Tja das ist nicht das Problem GIR/GJS stoppt mich)
+- Some calendar server features depend on Evolution configuration (wäre auch nicht das Problem)
+- Regional holiday coverage is currently Europe-focused (Ist es eigentlich nicht, die Implementation ist weiter)
 
 ---
 
