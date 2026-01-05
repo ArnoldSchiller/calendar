@@ -1,3 +1,23 @@
+/**
+ * Universal Calendar Applet Core
+ * ------------------------------
+ * This is the entry point for the Cinnamon Applet. It acts as the Controller
+ * in an MVC-like architecture, connecting the Cinnamon Panel with the
+ * underlying Logic and UI components.
+ * * * ARCHITECTURE OVERVIEW:
+ * 1. EventManager: Handles data fetching (ICS/Evolution/System).
+ * 2. CalendarLogic: Pure JS logic for date calculations and holiday parsing.
+ * 3. CalendarView: The complex St.Table based UI grid.
+ * 4. EventListView: Specialized view for displaying event details.
+ * * * SYSTEM INTEGRATION:
+ * - Uses 'Settings' for user-defined date formats and behavior.
+ * - Uses 'AppletPopupMenu' to host the calendar UI.
+ * - Uses 'KeybindingManager' for global hotkey support.
+ * * @author Arnold Schiller <calendar@projektit.de>
+ * @link https://github.com/ArnoldSchiller/calendar
+ * @link https://projektit.de/kalender
+ * @license GPL-3.0-or-later
+ */
 // ============================================================================
 // Project IT Calendar – Cinnamon Applet Entry Point
 // ----------------------------------------------------------------------------
