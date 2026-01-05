@@ -63,7 +63,6 @@ const { St, Clutter, Gio } = imports.gi;
 const { fileUtils: FileUtils } = imports.misc;
 const Gettext = imports.gettext;
 const Tooltips = imports.ui.tooltips;
-const GLib = imports.gi.GLib;
 
 /* === Dynamic Environment Detection ============================== */
 
@@ -791,146 +790,163 @@ export class CalendarView {
 	    this.contentBox.add_actor(box);
 	}
 
-
     /* ===========================================================
      * Create Form - edit and add events
      * =========================================================== */
     private createTerminForm(date: Date, editingEvent?: any): any {
         const box = new St.BoxLayout({
             vertical: true,
-            style_class: "calendar-main-box",
+            style_class: "calendar-main-box", // Consistent with your applet.js
             x_expand: true
         });
 
-        /* Entweder bestehende UUID oder ABER keine mit  GLib generieren macht EDS wenn keine */
-        const currentId = editingEvent ? editingEvent.id : undefined;
-
-        /* === All Day Toggle (Checkbox Ersatz) === */
-        const isInitialFullDay = editingEvent ? editingEvent.isFullDay : false;
-        const allDayCheckbox = new St.Button({
-            label: isInitialFullDay ? "☑ " + _("All Day") : "☐ " + _("All Day"),
-            style_class: "calendar-event-button",
-            toggle_mode: true,
-            checked: isInitialFullDay,
-            x_align: St.Align.START
-        });
+        // 1. Determine ID: Use existing or generate unique ID for new events
+        const currentId = editingEvent ? editingEvent.id : 
+            (Math.random().toString(36).substring(2) + Date.now().toString(36));
 
         /* === Title Entry === */
         const titleEntry = new St.Entry({
-            hint_text: _("What? (Nice event)"),
-            style_class: "calendar-event-summary",
+            // msgid "What?" is common in Cinnamon. "Nice event" as fall-through.
+            hint_text: editingEvent ? editingEvent.summary : _("What? (Nice event)"),
+            style_class: "calendar-event-summary", // Reusing your summary style
             text: editingEvent ? editingEvent.summary : ""
         });
 
         /* === Time Inputs === */
+        // Helper to format Date objects to HH:MM
         const formatTime = (d: Date) => {
             return `${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}`;
         };
 
         const startTimeStr = editingEvent ? formatTime(editingEvent.start) : this._getCurrentTime();
         const endTimeStr = editingEvent ? formatTime(editingEvent.end) : this._calculateDefaultEnd(startTimeStr);
-        const descriptionStr = (editingEvent && typeof editingEvent.description === 'string') ? editingEvent.description : "";
-        const timeBox = new St.BoxLayout({ vertical: false, style: "margin: 5px 0;" });
 
         const startEntry = new St.Entry({
             text: startTimeStr,
-            style_class: "calendar-event-time-present",
-            can_focus: true,
-            reactive: true
+            style_class: "calendar-event-time-present"
         });
 
         const endEntry = new St.Entry({
             text: endTimeStr,
-            style_class: "calendar-event-time-present",
-            can_focus: true,
-            reactive: true
+            style_class: "calendar-event-time-present"
         });
 
-        // Die zentrale Logik zum Umschalten der Felder
-        const updateVisibility = () => {
-            const isFullDay = allDayCheckbox.checked;
-            allDayCheckbox.set_label(isFullDay ? "☑ " + _("All Day") : "☐ " + _("All Day"));
-            
-            const opacity = isFullDay ? 128 : 255;
-            startEntry.set_opacity(opacity);
-            endEntry.set_opacity(opacity);
-            startEntry.set_reactive(!isFullDay);
-            endEntry.set_reactive(!isFullDay);
-            startEntry.can_focus = !isFullDay;
-            endEntry.can_focus = !isFullDay;
-        };
-
-        allDayCheckbox.connect("clicked", () => {
-            updateVisibility();
-        });
-
-        timeBox.add_actor(new St.Label({ text: _("From:"), style: "margin-right: 5px;" }));
-        timeBox.add_actor(startEntry);
-        timeBox.add_actor(new St.Label({ text: _("To:"), style: "margin: 0 5px;" }));
-        timeBox.add_actor(endEntry);
+        // Sync end time when start time changes (only for new events)
+        if (!editingEvent) {
+            startEntry.clutter_text.connect("text-changed", () => {
+                endEntry.set_text(this._calculateDefaultEnd(startEntry.get_text()));
+            });
+        }
 
         /* === Description Entry === */
         const descEntry = new St.Entry({
-            hint_text: _("Description"),
+            // msgid "Description" is a standard Cinnamon string
+            hint_text: editingEvent ? (editingEvent.description || _("Description")) : _("Description"),
             style_class: "calendar-event-row-content", 
             x_expand: true,
-            text: descriptionStr
+            text: editingEvent ? (editingEvent.description || "") : ""
+        });
+        descEntry.clutter_text.set_single_line_mode(false);
+
+        /* === Button Row === */
+        const buttonBox = new St.BoxLayout({
+            style: "margin-top: 10px;",
+            x_expand: true
         });
 
-        // WICHTIG: Den einzeiligen Modus explizit ausschalten
-        // In manchen St-Versionen heißt das 'single-line-mode'
-        descEntry.clutter_text.single_line_mode = false;
-        descEntry.clutter_text.line_wrap = true;
-        descEntry.clutter_text.set_activatable(false); // Verhindert 'Enter' zum Abschicken
-        
-        /* === Save Button === */
-        const buttonBox = new St.BoxLayout({ style: "margin-top: 10px;" });
+        /* === Save/Update Button === */
         const saveBtn = new St.Button({
+            // msgid "Update" and "Save" are standard Cinnamon
             label: editingEvent ? _("Update") : _("Save"),
             style_class: "calendar-event-button",
             x_expand: true
         });
 
-     
-     
+ 
+        /* === Save Button Logic === */
         saveBtn.connect("clicked", () => {
             const title = titleEntry.get_text().trim();
             if (!title) return;
 
-            const isFullDay = allDayCheckbox.checked;
+            const currentSourceUid = editingEvent ? editingEvent.sourceUid : undefined;
+
+            global.log(`[CalendarApplet] Saving: ${currentId} - ${title} (Source: ${currentSourceUid})`);
+            // Debug-Log um zu sehen, was wir abschicken
+            
             const start = this._buildDateTime(date, startEntry.get_text());
             const end = this._buildDateTime(date, endEntry.get_text());
 
-            this.applet.eventManager.addEvent({
-                id: currentId, 
-                sourceUid: editingEvent ? editingEvent.sourceUid : undefined,
-                summary: title,
-                // Wir trimmen, damit wir nicht aus Versehen " " als Änderung speichern
-                description: descEntry.get_text() ? descEntry.get_text().trim() : "",
-                start: start,
-                end: end,
-                isFullDay: isFullDay,
-                color: editingEvent ? editingEvent.color : "#3498db"
-            });
+            try {
+                // WICHTIG: Alle Felder übergeben, die addEvent(ev: EventData) erwartet!
+                this.applet.eventManager.addEvent({
+                    id: currentId,
+                    sourceUid: currentSourceUid,
+                    summary: title,
+                    description: descEntry.get_text() || "",
+                    start: start,
+                    end: end,
+                    isFullDay: editingEvent ? editingEvent.isFullDay : false,
+                    color: editingEvent ? editingEvent.color : "#3498db"
+                });
 
+                // UI sofort umschalten (Optimistic UI)
+                this.dayMode = "VIEW";
+                this.editingEvent = null;
+                this.dayModeDate = null;
+                this.render();
+            } catch (err) {
+                global.logError("[CalendarApplet] Save Error: " + err);
+            }
+        });
+
+        /* === Cancel Button === */
+        const cancelBtn = new St.Button({
+            label: _("Cancel"), // Standard msgid
+            style_class: "calendar-event-button",
+            x_expand: true
+        });
+
+        cancelBtn.connect("clicked", () => {
             this.dayMode = "VIEW";
             this.editingEvent = null;
             this.render();
         });
 
-        /* === Zusammenbau === */
-        box.add_actor(allDayCheckbox);
+        // Add Actors to the main box
         box.add_actor(titleEntry);
+        
+        const timeBox = new St.BoxLayout();
+        timeBox.add_actor(startEntry);
+        timeBox.add_actor(endEntry);
         box.add_actor(timeBox);
+        
         box.add_actor(descEntry);
+
+        // Layout Buttons
+        buttonBox.add_actor(cancelBtn);
         buttonBox.add_actor(saveBtn);
+
+        /* === Delete Button (Optional - only in Edit Mode) === */
+        if (editingEvent) {
+            const deleteBtn = new St.Button({
+                label: _("Delete"), // Standard msgid
+                style_class: "calendar-event-button",
+                style: "color: #ff5555;" // Simple red tint for delete
+            });
+
+            deleteBtn.connect("clicked", () => {
+                this.applet.eventManager.deleteEvent(editingEvent.id);
+                this.dayMode = "VIEW";
+                this.editingEvent = null;
+                this.render();
+            });
+            buttonBox.add_actor(deleteBtn);
+        }
+
         box.add_actor(buttonBox);
-
-        // Initialer Aufruf, um den Startzustand (z.B. bei Edit) korrekt zu setzen
-        updateVisibility();
-
         return box;
     }
+
 
     /* ============================================================
      * Date Helpers

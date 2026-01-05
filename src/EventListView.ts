@@ -237,7 +237,7 @@ export class EventListView {
         // Optional: Sub-text (e.g., location or description)
         if (ev.description) {
             contentVBox.add_actor(new St.Label({
-                text: ev.description,
+                text: ev.description || "",
                 style_class: "calendar-event-time-future"
             }));
         }

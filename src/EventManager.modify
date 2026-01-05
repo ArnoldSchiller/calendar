@@ -350,93 +350,53 @@ export class EventManager {
      * Event-Daten auf ICal-Komponente mappen
      * Zentralisiert das Setzen von Summary, Description und Zeiten.
      */
+    private _applyEventToComponent(icalComp: any, ev: EventData): void {
+        icalComp.set_summary(ev.summary);
+        icalComp.set_description(ev.description || "");
+
+        const tz = ICal.Timezone.get_utc_timezone();
+        
+        // START-ZEIT
+        let start = ICal.Time.new_null_time();
+        if (ev.isFullDay) {
+            start.set_date(ev.start.getFullYear(), ev.start.getMonth() + 1, ev.start.getDate());
+            start.set_is_date(true);
+        } else {
+            start = ICal.Time.new_from_timet_with_zone(Math.floor(ev.start.getTime() / 1000), 0, tz);
+        }
+
+        // END-ZEIT
+        let end = ICal.Time.new_null_time();
+        if (ev.isFullDay) {
+            // WICHTIG: Wir nehmen das bestehende Enddatum.
+            // Falls Start und Ende gleich sind (1-Tages-Termin), muss das iCal-Ende +1 Tag sein.
+            // Falls es bereits ein Mehrtages-Termin ist, müssen wir sicherstellen, 
+            // dass das iCal-Ende mindestens einen Tag NACH dem Start liegt.
+            
+            let endDate = new Date(ev.end);
+            
+            // Wenn das Ende zeitlich gleich oder vor dem Start liegt (Sicherheitscheck), 
+            // machen wir einen 1-Tages-Termin daraus.
+            if (endDate.getTime() <= ev.start.getTime()) {
+                endDate.setDate(ev.start.getDate() + 1);
+            }
+            
+            // iCal Ganztag Standard: Das Datum im Feld DTEND wird nicht mehr zum Termin gezählt.
+            end.set_date(endDate.getFullYear(), endDate.getMonth() + 1, endDate.getDate());
+            end.set_is_date(true);
+        } else {
+            end = ICal.Time.new_from_timet_with_zone(Math.floor(ev.end.getTime() / 1000), 0, tz);
+        }
+
+        icalComp.set_dtstart(start);
+        icalComp.set_dtend(end);
+    }
 
 
     /**
      * Hauptmethode zum Hinzufügen oder Aktualisieren
      */
     public addEvent(ev: EventData): void {
-    	if (ev.id && ev.sourceUid) {
-        	this._modifyExistingEvent(ev);
-    	} else {
-        
-        	this._createNewEvent(ev);
-    	}
-	
-     }
-    
-private _createNewEvent(ev: EventData): void {
-    const source = this._getDefaultWritableSource();
-    if (!source) {
-        global.logError("Create: Keine schreibbare Quelle");
-        return;
-    }
-
-    // 1️⃣ ECal Component
-    const comp = ECal.Component.new();
-    comp.set_new_vtype(ECal.ComponentVType.EVENT);
-
-    // 2️⃣ UID MUSS gesetzt sein
-    comp.set_uid(ev.id || GLib.uuid_string_random());
-
-    // 3️⃣ SUMMARY
-    const summaryText = ECal.ComponentText.new(
-        ev.summary || "Neuer Termin",
-        null
-    );
-    comp.set_summary(summaryText);
-
-    // 4️⃣ DESCRIPTION (optional, aber exakt so)
-    if (ev.description && ev.description.trim() !== "") {
-        const descText = ECal.ComponentText.new(ev.description, null);
-        comp.set_description(descText);
-    }
-
-    // 5️⃣ Zeiten
-    const tz = ICal.Timezone.get_utc_timezone();
-    const start = ICal.Time.new_from_timet_with_zone(
-        Math.floor(ev.start.getTime() / 1000),
-        0,
-        tz
-    );
-    const end = ICal.Time.new_from_timet_with_zone(
-        Math.floor(ev.end.getTime() / 1000),
-        0,
-        tz
-    );
-    comp.set_dtstart(start);
-    comp.set_dtend(end);
-
-    // 6️⃣ Create
-    ECal.Client.connect(
-        source,
-        ECal.ClientSourceType.EVENTS,
-        30,
-        null,
-        (_o, res) => {
-            try {
-                const client = ECal.Client.connect_finish(res);
-
-                client.create_object(comp, null, null, (_c, cres) => {
-                    try {
-                        client.create_object_finish(cres);
-                        global.log("✅ CREATE OK");
-                        this.refresh();
-                    } catch (e) {
-                        global.logError("❌ create_object_finish failed: " + e);
-                    }
-                });
-            } catch (e) {
-                global.logError("❌ connect failed: " + e);
-            }
-        }
-    );
-}
-
-
-    
-	
-    private _modifyExistingEvent(ev: EventData): void {
         const source = this._resolveSource(ev.sourceUid);
         if (!source) return;
 
@@ -525,98 +485,18 @@ private _createNewEvent(ev: EventData): void {
 				}
                         } catch (e) {
                             // Nur wenn get_object wirklich sagt "UID existiert nicht"
-                            global.logWarning(`${this._uuid}: Smart Merge fehlgeschlagen (ID nicht gefunden), erstelle neu: ${e}`);
-    
-   			    // Wir bauen hier das fehlende icalComp für den Fallback
-   			    let fallbackComp = ECal.Component.new();
-    			    fallbackComp.set_new_vtype(ECal.ComponentVType.EVENT);
-    			    fallbackComp.set_uid(ev.id || GLib.uuid_string_random());
-    
-    			    this._createAsNew(client, ev, fallbackComp);
-                            
+                            global.logWarning(`${this._uuid}: Smart Merge fehlgeschlagen (ID nicht gefunden): ${e}`);
+                            this._createAsNew(client, ev);
                         }
                     });
                 } else {
-                    /* Hier sollte er eigentlich nie landen falls doch speichern wir es als neues Event ab */ 
-                    this._createNewEvent(ev);
+                    this._createAsNew(client, ev);
                 }
             } catch (e) {
                 global.logError("Connection failed: " + e);
             }
         });
     }
-
-
-	private _applyEventToComponent(ecalComp: any, ev: EventData): void {
-
-	    // 🔑 INTERNES ICal-Objekt holen
-	    const ical = ecalComp.get_icalcomponent();
-
-	    // UID (sehr wichtig)
-	    ical.set_uid(ev.id);
-
-	    // DTSTAMP
-	    ical.set_dtstamp(
-	        ICal.Time.new_current_with_zone(
-	            ICal.Timezone.get_utc_timezone()
-	        )
-	    );
-
-	    // SUMMARY
-	    if (ev.summary) {
-	        const sumProp = ICal.Property.new_summary(ev.summary);
-	        ical.add_property(sumProp);
-	    }
-
-	    // DESCRIPTION   HIER IST DER FIX
-	    if (ev.description && ev.description.trim() !== "") {
-	        const descProp = ICal.Property.new_description(ev.description);
-	        ical.add_property(descProp);
-	    }
-
-	    // ZEITEN
-	    const tz = ICal.Timezone.get_utc_timezone();
-	
-	    let start: any;
-	    let end: any;
-	
-	    if (ev.isFullDay) {
-	        start = ICal.Time.new_null_time();
-	        start.set_date(
-	            ev.start.getFullYear(),
-	            ev.start.getMonth() + 1,
-	            ev.start.getDate()
-	        );
-	        start.set_is_date(true);
-	
-	        end = ICal.Time.new_null_time();
-	        const endDate = new Date(ev.end);
-	        if (endDate.getTime() <= ev.start.getTime()) {
-	            endDate.setDate(ev.start.getDate() + 1);
-	        }
-	        end.set_date(
-	            endDate.getFullYear(),
-	            endDate.getMonth() + 1,
-	            endDate.getDate()
-	        );
-	        end.set_is_date(true);
-	    } else {
-	        start = ICal.Time.new_from_timet_with_zone(
-	            Math.floor(ev.start.getTime() / 1000), 0, tz
-	        );
-	        end = ICal.Time.new_from_timet_with_zone(
-	            Math.floor(ev.end.getTime() / 1000), 0, tz
-	        );
-	    }
-
-	    ical.set_dtstart(start);
-	    ical.set_dtend(end);
-	}
-
-
-
-
-
 
     private _applyTimesToComponent(icalComp: any, ev: EventData): void {
         const tz = ICal.Timezone.get_utc_timezone();
@@ -641,35 +521,36 @@ private _createNewEvent(ev: EventData): void {
      * Erstellt ein komplett neues Objekt im EDS.
      * Fix: Erfordert in dieser GJS-Umgebung 4 Argumente (comp, opid, cancellable, callback).
      */
-     private _createAsNew(client: any, ev: EventData, icalComp: any): void {
-	    try {
-	        // Falls der Aufrufer (z.B. aus dem Modify-Fallback) schon ein icalComp mitgibt,
-	        // nutzen wir es. Wenn es null ist (aus der normalen addEvent), erstellen wir es hier.
-	        let comp = icalComp;
-	        if (!comp) {
-	            comp = this._buildIcalComponent(ev);
-	        } else {
-	            // Wenn schon eins da ist, stellen wir sicher, dass die Daten aktuell sind
-	            this._applyEventToComponent(comp, ev);
-	        }
-
-	        // Der eigentliche Speicherbefehl (4 Argumente für GJS)
-	        client.create_object(comp, null, null, (_obj: any, res: any) => {
-	            try {
-	                client.create_object_finish(res);
-	                global.log(`${this._uuid}: Event erfolgreich erstellt.`);
-	                this.refresh();
-	            } catch (e) {
-	                global.logError(`${this._uuid}: create_object_finish failed: ${e}`);
-	            }
-	        });
-	    } catch (e) {
-	        global.logError(`${this._uuid}: _createAsNew failed: ${e}`);
-	    }
-	}
-
-   
-      
+    private _createAsNew(client: any, ev: EventData): void {
+        try {
+            const icalComp = ICal.Component.new(ICal.ComponentKind.VEVENT_COMPONENT);
+            
+            // Bei Neuanlage füllen wir alles initial
+            icalComp.set_summary(ev.summary || "New Event");
+            icalComp.set_description(ev.description || "");
+            
+            // Zeit-Mapping für Neuanlage
+            this._applyTimesToComponent(icalComp, ev);
+            
+            // FIX: 4 Argumente (Component, opid/null, Cancellable/null, Callback)
+            client.create_object(icalComp, null, null, (_c: any, res: any) => {
+                try {
+                    const result = client.create_object_finish(res);
+                    // GJS gibt oft [success, newUid] zurück
+                    const success = Array.isArray(result) ? result[0] : result;
+                    
+                    if (success) {
+                        global.log(`${this._uuid}: Event erfolgreich erstellt.`);
+                        this.refresh();
+                    }
+                } catch (e) {
+                    global.logError(`${this._uuid}: create_object_finish failed: ${e}`);
+                }
+            });
+        } catch (e) {
+            global.logError(`${this._uuid}: _createAsNew failed: ${e}`);
+        }
+    }
      /**
      * Findet eine schreibbare Kalenderquelle.
      */
@@ -711,29 +592,7 @@ private _createNewEvent(ev: EventData): void {
             } catch(e) { return false; }
         });
     }
-    /* 
-     * von Terminen des Proxy dürfen wir nur modify machen
-     * also müssen wir für create new noch die writable finden
-     */
-    private _getDefaultWritableSource(): any {
-      if (!this._registry) {
-        this._registry = EDataServer.SourceRegistry.new_sync(null);
-      }
-
-      const sources = this._registry.list_sources(EDataServer.SOURCE_EXTENSION_CALENDAR);
-
-      return sources.find((s: any) => {
-         try {
-            const ext = s.get_extension(EDataServer.SOURCE_EXTENSION_CALENDAR);
-            if (ext.get_readonly && ext.get_readonly()) return false;
-
-            // 🔑 DAS ist wichtig
-            return s.get_parent() !== null;
-         } catch {
-            return false;
-         }
-      });
-    }
+    
 
 
     /**
@@ -754,25 +613,6 @@ private _createNewEvent(ev: EventData): void {
         if (isFullDay) time.set_is_date(true);
         return time;
     }
-   
-    
-	/**
-	 * Factory-Methode zur Erstellung einer validen ECal.Component.
- 	 * Kapselt die Eigenheiten der GJS-Libecal Bindungen.
-	 */
-	private _buildIcalComponent(ev: EventData): any {
-	    const icalComp = ECal.Component.new();
-	    icalComp.set_new_vtype(ECal.ComponentVType.EVENT);
-	    icalComp.set_uid(ev.id || GLib.uuid_string_random());
-	
-	    // Hier rufen wir die saubere Mapping-Funktion von oben auf
-	    this._applyEventToComponent(icalComp, ev);
-
-	    return icalComp;
-	} 
-
-       
-
 
 }
 

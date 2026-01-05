@@ -51,8 +51,9 @@ declare namespace imports.gettext {}
 
 /* ---------- App-spezifische Typen ---------- */
 declare interface EventData {
-    id: string;
-    sourceUid: string;
+    id?: string;
+    sourceUid?: string;
+    pureId?: string;
     start: Date;
     end: Date;
     summary: string;
