@@ -579,7 +579,7 @@ export class CalendarView {
             style: "padding: 10px;",
         });
 
-        const importBtn = new St.Button({
+        /*const importBtn = new St.Button({
             label: _("Import a Calendar"),
             style_class: "calendar-event-button",
             x_expand: true,
@@ -591,8 +591,9 @@ export class CalendarView {
             );
             this.onImportRequested?.();
         });
+        */
 
-        actionArea.add_actor(importBtn);
+        /* actionArea.add_actor(importBtn); */
         yearBox.add_actor(actionArea);
 
         const grid = new St.Table({
@@ -769,7 +770,7 @@ export class CalendarView {
 	        x_align: St.Align.END
 	    });
 	
-	    // Nur Add-Button anzeigen, wenn nicht bereits im ADD/EDIT Modus
+	    /* Nur Add-Button anzeigen, wenn nicht bereits im ADD/EDIT Modus
 	    if (this.dayMode === "VIEW") {
 	        const addBtn = new St.Button({
 	            label: _("Add event"),
@@ -785,6 +786,7 @@ export class CalendarView {
 	
 	        actionBar.add_actor(addBtn);
 	    }
+            */
 	    
 	    box.add_actor(actionBar);
 	    box.add_actor(backBtn);
@@ -869,20 +871,23 @@ export class CalendarView {
         timeBox.add_actor(new St.Label({ text: _("To:"), style: "margin: 0 5px;" }));
         timeBox.add_actor(endEntry);
 
-        /* === Description Entry === */
+        /* === Description Entry === 
+         * Description funktioniert nicht richtig in EDS Cinnamon
         const descEntry = new St.Entry({
             hint_text: _("Description"),
             style_class: "calendar-event-row-content", 
             x_expand: true,
             text: descriptionStr
         });
+        */
 
         // WICHTIG: Den einzeiligen Modus explizit ausschalten
         // In manchen St-Versionen heißt das 'single-line-mode'
+        /* siehe oben
         descEntry.clutter_text.single_line_mode = false;
         descEntry.clutter_text.line_wrap = true;
         descEntry.clutter_text.set_activatable(false); // Verhindert 'Enter' zum Abschicken
-        
+        */
         /* === Save Button === */
         const buttonBox = new St.BoxLayout({ style: "margin-top: 10px;" });
         const saveBtn = new St.Button({
@@ -906,7 +911,7 @@ export class CalendarView {
                 sourceUid: editingEvent ? editingEvent.sourceUid : undefined,
                 summary: title,
                 // Wir trimmen, damit wir nicht aus Versehen " " als Änderung speichern
-                description: descEntry.get_text() ? descEntry.get_text().trim() : "",
+                description: "", //descEntry.get_text() ? descEntry.get_text().trim() : "",
                 start: start,
                 end: end,
                 isFullDay: isFullDay,
@@ -922,7 +927,7 @@ export class CalendarView {
         box.add_actor(allDayCheckbox);
         box.add_actor(titleEntry);
         box.add_actor(timeBox);
-        box.add_actor(descEntry);
+        /* box.add_actor(descEntry); */
         buttonBox.add_actor(saveBtn);
         box.add_actor(buttonBox);
 
