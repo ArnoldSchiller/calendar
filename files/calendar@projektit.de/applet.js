@@ -1,138 +1,634 @@
-// ============================================================================
-// Project IT Calendar – Cinnamon Applet Entry Point
-// ----------------------------------------------------------------------------
-// This file represents the main entry point of the Cinnamon applet.
-// It is responsible for:
-//   - Initializing the applet instance
-//   - Wiring together UI, logic, and event management
-//   - Registering the applet with the Cinnamon panel infrastructure
-//
-// IMPORTANT RULE FOR THIS CLEANUP:
-// --------------------------------
-// * NO executable code has been changed.
-// * ONLY comments were added, translated, or expanded.
-// * Any potential architectural or technical improvement is noted as TODO
-//   comments WITHOUT changing runtime behavior.
-//
-// The goal of this documentation is that even a reader with:
-//   - no TypeScript knowledge
-//   - no Cinnamon/GJS background
-//   - no calendar domain expertise
-// can still understand what happens here and why.
-// ============================================================================
-/* eslint-disable @typescript-eslint/no-unused-vars */
-// ----------------------------------------------------------------------------
-// GJS / Cinnamon Imports
-// ----------------------------------------------------------------------------
-// These imports expose native Cinnamon and GNOME APIs to JavaScript.
-// In GJS, these are NOT npm modules but runtime-provided bindings.
-const Applet = imports.ui.applet;
-const PopupMenu = imports.ui.popupMenu;
-const Main = imports.ui.main;
-const St = imports.gi.St;
-const Gio = imports.gi.Gio;
-const GLib = imports.gi.GLib;
-// ----------------------------------------------------------------------------
-// Internal Project Imports
-// ----------------------------------------------------------------------------
-// These are local project modules compiled into the final applet bundle.
-// They are attached to the global namespace by the build system.
-const CalendarView = global.CalendarView;
-const EventManager = global.EventManager;
-const CalendarLogic = global.CalendarLogic;
-// ----------------------------------------------------------------------------
-// Applet Class Definition
-// ----------------------------------------------------------------------------
-// This class is instantiated by Cinnamon when the applet is loaded.
-// One instance exists per panel placement.
-class ProjectITCalendarApplet extends Applet.Applet {
-    // ------------------------------------------------------------------------
-    // Constructor
-    // ------------------------------------------------------------------------
-    // Called automatically by Cinnamon.
-    // The parameters are provided by the panel and must not be changed.
-    constructor(metadata, orientation, panelHeight, instanceId) {
-        super(orientation, panelHeight, instanceId);
-        // Set the tooltip shown when hovering over the panel icon
-        this.set_applet_tooltip("Calendar");
-        // --------------------------------------------------------------------
-        // Popup Menu Initialization
-        // --------------------------------------------------------------------
-        // Cinnamon applets typically show UI inside a popup menu.
-        // The menu is anchored to the applet actor (panel icon).
-        this.menu = new PopupMenu.PopupMenu(this, 0.0, St.Side.TOP);
-        Main.uiGroup.add_actor(this.menu.actor);
-        this.menu.actor.hide();
-        // --------------------------------------------------------------------
-        // Core Service Initialization
-        // --------------------------------------------------------------------
-        // These components are intentionally decoupled:
-        //   - EventManager: system calendar access (EDS, DBus)
-        //   - CalendarLogic: pure logic, no UI, no IO
-        //   - CalendarView: UI only, reacts to signals
-        this.eventManager = new EventManager(metadata.uuid);
-        this.calendarLogic = new CalendarLogic();
-        // --------------------------------------------------------------------
-        // View Initialization
-        // --------------------------------------------------------------------
-        // CalendarView is responsible for rendering and navigation.
-        // It receives references to the applet and manager but does not
-        // perform IO or DBus operations itself.
-        this.calendarView = new CalendarView(this, this.menu, this.eventManager, this.calendarLogic);
-        // --------------------------------------------------------------------
-        // Signal Wiring
-        // --------------------------------------------------------------------
-        // The EventManager emits signals when calendar data changes.
-        // The view listens and re-renders accordingly.
-        this.eventManager.connect('events-updated', () => {
-            this.calendarView.render();
-        });
-        // --------------------------------------------------------------------
-        // Initial Render
-        // --------------------------------------------------------------------
-        // Ensures the UI is visible immediately, even if real data
-        // has not yet arrived from the system calendar.
-        this.calendarView.render();
-    }
-    // ------------------------------------------------------------------------
-    // Applet Click Handler
-    // ------------------------------------------------------------------------
-    // This method is called automatically by Cinnamon when the user
-    // clicks the panel icon.
-    on_applet_clicked(event) {
-        this.menu.toggle();
-    }
-    // ------------------------------------------------------------------------
-    // Applet Removal Cleanup
-    // ------------------------------------------------------------------------
-    // Called when the applet is removed from the panel or Cinnamon restarts.
-    // Used to free resources and avoid dangling actors.
-    on_applet_removed_from_panel() {
-        if (this.menu) {
-            this.menu.destroy();
+"use strict";
+/**
+ * Universal Calendar Applet Core
+ * ==============================
+ *
+ * This is the main entry point for the Cinnamon Calendar Applet.
+ * It orchestrates all components and manages the complete UI lifecycle.
+ *
+ * IMPORTANT: This file is COMPLETELY DIFFERENT from the simplified
+ * documentation version previously created. This is the ACTUAL production code.
+ *
+ * ------------------------------------------------------------------
+ * ARCHITECTURE OVERVIEW:
+ * ------------------------------------------------------------------
+ * This applet follows a composite MVC architecture:
+ *
+ * 1. MODEL LAYER:
+ *    - EventManager: Fetches calendar data from Evolution Data Server (EDS)
+ *    - CalendarLogic: Calculates dates, holidays, and business logic
+ *
+ * 2. VIEW LAYER:
+ *    - CalendarView: Main calendar grid (month/year/day views)
+ *    - EventListView: Sidebar event list with scrollable agenda
+ *    - Header/Footer: Additional UI components for navigation
+ *
+ * 3. CONTROLLER LAYER:
+ *    - This class (UniversalCalendarApplet): Coordinates everything
+ *    - Settings system, hotkeys, UI layout, signal routing
+ *
+ * ------------------------------------------------------------------
+ * VISUAL LAYOUT STRUCTURE:
+ * ------------------------------------------------------------------
+ * The applet uses a sophisticated two-column layout:
+ *
+ * ┌─────────────────────────────────────────────────────────────┐
+ * │ [Event List View]      │ [Calendar View + Header + Footer]  │
+ * │ (Left Column)          │ (Right Column)                     │
+ * │ • Scrollable event list│ • Date header                      │
+ * │ • Clickable events     │ • Month grid                       │
+ * │ • Date navigation      │ • Year view                        │
+ * │                        │ • Day details                      │
+ * │                        │ • Footer buttons                   │
+ * └─────────────────────────────────────────────────────────────┘
+ *
+ * @author Arnold Schiller <calendar@projektit.de>
+ * @link https://github.com/ArnoldSchiller/calendar
+ * @link https://projektit.de/kalender
+ * @license GPL-3.0-or-later
+ */
+Object.defineProperty(exports, "__esModule", { value: true });
+/* ================================================================
+ * CINNAMON / GJS IMPORTS
+ * ================================================================
+ *
+ * GJS (GNOME JavaScript) provides bindings to Cinnamon's native APIs.
+ * These are NOT npm packages - they're loaded at runtime by Cinnamon.
+ */
+const GLib = imports.gi.GLib; // Low-level GLib utilities (timers, file ops)
+const St = imports.gi.St; // Shell Toolkit (UI widgets)
+const Applet = imports.ui.applet; // Base applet classes
+const PopupMenu = imports.ui.popupMenu; // Popup menu system
+const Settings = imports.ui.settings; // User settings persistence
+const Main = imports.ui.main; // Main Cinnamon UI manager
+const Util = imports.misc.util; // Utility functions (spawn commands)
+const FileUtils = imports.misc.fileUtils; // File system utilities
+const Gettext = imports.gettext; // Internationalization (i18n)
+const Gtk = imports.gi.Gtk; // GTK for file dialogs (ICS import)
+const Gio = imports.gi.Gio; // GIO for file operations
+/* ================================================================
+ * MODULE IMPORTS (TypeScript/ES6 style)
+ * ================================================================
+ *
+ * These are local project modules. During TypeScript compilation,
+ * they're bundled together. At runtime, they're available globally.
+ */
+const EventManager_1 = require("./EventManager");
+const EventListView_1 = require("./EventListView");
+const CalendarLogic_1 = require("./CalendarLogic");
+/* ================================================================
+ * INTERNATIONALIZATION (i18n) SETUP
+ * ================================================================
+ *
+ * Cinnamon applets use Gettext for translations. This system:
+ * 1. Looks for translations in the applet's locale/ directory
+ * 2. Falls back to Cinnamon's system translations
+ * 3. Falls back to GNOME Calendar translations
+ *
+ * This maximizes translation coverage with minimal effort.
+ */
+/**
+ * Global translation function.
+ * Must be initialized by setupLocalization() before use.
+ */
+let _;
+/**
+ * Initializes the translation system for this applet instance.
+ *
+ * @param uuid - Unique identifier of the applet (e.g., "calendar@projektit.de")
+ * @param path - Filesystem path to the applet directory
+ */
+function setupLocalization(uuid, path) {
+    // Bind the applet's translation domain
+    Gettext.bindtextdomain(uuid, path + "/locale");
+    // Create translation function with fallback chain
+    _ = function (str) {
+        // 1. Try applet-specific translations
+        let custom = Gettext.dgettext(uuid, str);
+        if (custom !== str)
+            return custom;
+        // 2. Try Cinnamon core translations
+        let cinnamon = Gettext.dgettext("cinnamon", str);
+        if (cinnamon !== str)
+            return cinnamon;
+        // 3. Fall back to GNOME Calendar translations
+        return Gettext.dgettext("gnome-calendar", str);
+    };
+}
+/* ================================================================
+ * MAIN APPLET CLASS
+ * ================================================================
+ *
+ * This is the central controller class that Cinnamon instantiates.
+ * One instance exists for each panel placement of the applet.
+ *
+ * Extends TextIconApplet which supports both text label and icon
+ * in the Cinnamon panel.
+ */
+class UniversalCalendarApplet extends Applet.TextIconApplet {
+    /* ============================================================
+     * CONSTRUCTOR
+     * ============================================================
+     *
+     * Called by Cinnamon when the applet is loaded into the panel.
+     * Initializes ALL components and builds the complete UI hierarchy.
+     *
+     * The constructor is organized in clear phases:
+     * 1. Backend initialization (settings, managers, logic)
+     * 2. UI construction (layout, components, wiring)
+     * 3. Signal connections and final setup
+     */
+    constructor(metadata, orientation, panel_height, instance_id) {
+        // Call parent constructor (TextIconApplet)
+        super(orientation, panel_height, instance_id);
+        /**
+         * ID of the periodic update timer. Used for cleanup.
+         */
+        this._updateId = 0;
+        /* ============================================================
+         * SETTINGS PROPERTIES (Bound to UI settings)
+         * ============================================================
+         *
+         * These properties are automatically synchronized with the
+         * Cinnamon settings system via bind() calls.
+         */
+        /**
+         * Whether to show the calendar icon in the panel.
+         */
+        this.showIcon = false;
+        /**
+         * Whether to show the event list sidebar.
+         */
+        this.showEvents = true;
+        /**
+         * Whether to display ISO week numbers in the month grid.
+         */
+        this.showWeekNumbers = false;
+        /**
+         * Whether to use custom date/time formats.
+         */
+        this.useCustomFormat = false;
+        /**
+         * Custom format string for panel label (uses GLib.DateTime format).
+         */
+        this.customFormat = "";
+        /**
+         * Custom format string for panel tooltip.
+         */
+        this.customTooltipFormat = "";
+        /**
+         * Global hotkey to open the calendar popup.
+         */
+        this.keyOpen = "";
+        // Store applet identifier for settings and hotkeys
+        this.uuid = metadata.uuid;
+        // Initialize translation system
+        setupLocalization(this.uuid, metadata.path);
+        try {
+            /* ====================================================
+             * PHASE 1: BACKEND INITIALIZATION
+             * ==================================================== */
+            // 1.1 Settings system - persists user preferences
+            this.settings = new Settings.AppletSettings(this, this.uuid, instance_id);
+            // 1.2 Menu manager - handles popup menu lifecycle
+            this.menuManager = new PopupMenu.PopupMenuManager(this);
+            // 1.3 Core business components
+            this.eventManager = new EventManager_1.EventManager();
+            this.eventListView = new EventListView_1.EventListView();
+            this.CalendarLogic = new CalendarLogic_1.CalendarLogic(metadata.path);
+            // 1.4 Dynamic component loading
+            // CalendarView is loaded from a separate file at runtime
+            const CalendarModule = FileUtils.requireModule(metadata.path + '/CalendarView');
+            /* ====================================================
+             * PHASE 2: SETTINGS BINDING
+             * ====================================================
+             *
+             * Connect settings UI to internal properties.
+             * When a setting changes, the corresponding callback is triggered.
+             */
+            this.settings.bind("show-icon", "showIcon", this.on_settings_changed);
+            this.settings.bind("show-events", "showEvents", this.on_settings_changed);
+            this.settings.bind("show-week-numbers", "showWeekNumbers", this.on_settings_changed);
+            this.settings.bind("use-custom-format", "useCustomFormat", this.on_settings_changed);
+            this.settings.bind("custom-format", "customFormat", this.on_settings_changed);
+            this.settings.bind("custom-tooltip-format", "customTooltipFormat", this.on_settings_changed);
+            this.settings.bind("keyOpen", "keyOpen", this.on_hotkey_changed);
+            /* ====================================================
+             * PHASE 3: POPUP MENU CONSTRUCTION
+             * ==================================================== */
+            // Create the popup menu that will host our calendar UI
+            this.menu = new Applet.AppletPopupMenu(this, orientation);
+            this.menuManager.addMenu(this.menu);
+            /* ====================================================
+             * PHASE 4: UI CONSTRUCTION
+             * ====================================================
+             *
+             * The UI is built as a hierarchical tree of St widgets.
+             * This is the most complex part of the constructor.
+             */
+            // 4.1 Main vertical container (root of our UI)
+            this._mainBox = new St.BoxLayout({
+                vertical: true,
+                style_class: 'calendar-main-box'
+            });
+            /**
+             * HEADER SECTION
+             * --------------
+             * Displays current day/date and acts as a "Home" button.
+             * Clicking it returns to today's date in the calendar.
+             *
+             * Visual structure:
+             * ┌─────────────────────────────┐
+             * │ Monday                      │ ← Day label
+             * │ 1. January 2026            │ ← Date label
+             * │ New Year's Day             │ ← Holiday (optional)
+             * └─────────────────────────────┘
+             */
+            let headerBox = new St.BoxLayout({
+                vertical: true,
+                style_class: 'calendar-today-home-button',
+                reactive: true // Makes it clickable
+            });
+            // Click handler: Return to today's date
+            headerBox.connect("button-release-event", () => {
+                this.CalendarView.resetToToday();
+                this.setHeaderDate(new Date());
+            });
+            // Create header labels
+            this._dayLabel = new St.Label({ style_class: 'calendar-today-day-label' });
+            this._dateLabel = new St.Label({ style_class: 'calendar-today-date-label' });
+            this._holidayLabel = new St.Label({ style_class: 'calendar-today-holiday' });
+            // Add labels to header
+            headerBox.add_actor(this._dayLabel);
+            headerBox.add_actor(this._dateLabel);
+            headerBox.add_actor(this._holidayLabel);
+            /**
+             * CALENDAR GRID
+             * -------------
+             * The main calendar component (month/year/day views).
+             * Loaded dynamically from CalendarView module.
+             */
+            this.CalendarView = new CalendarModule.CalendarView(this);
+            /**
+             * SIGNAL CONNECTION: Event List → Calendar Navigation
+             * ----------------------------------------------------
+             * When a user clicks an event in the list view,
+             * the calendar should jump to that event's date.
+             *
+             * This creates navigation flow between components.
+             */
+            this.eventListView.connect('event-clicked', (actor, ev) => {
+                if (ev && ev.start) {
+                    // 1. Jump calendar to the event's date
+                    this.CalendarView.jumpToDate(ev.start);
+                    // 2. Update header to show the event's date
+                    this.setHeaderDate(ev.start);
+                }
+            });
+            /**
+             * FOOTER SECTION
+             * ---------------
+             * System management buttons at the bottom.
+             */
+            let footerBox = new St.BoxLayout({ style_class: 'calendar-footer' });
+            // Button: Open Cinnamon's date/time settings
+            let settingsBtn = new St.Button({
+                label: _("Date and Time Settings"),
+                style_class: 'calendar-footer-button',
+                x_expand: true
+            });
+            settingsBtn.connect("clicked", () => {
+                this.menu.close();
+                Util.spawnCommandLine("cinnamon-settings calendar");
+            });
+            // Button: Open calendar management
+            let calendarBtn = new St.Button({
+                label: _("Manage Calendars"),
+                style_class: 'calendar-footer-button',
+                x_expand: true
+            });
+            calendarBtn.connect("clicked", () => {
+                this.menu.close();
+                const currentDate = this.CalendarView.getCurrentlyDisplayedDate();
+                const epoch = Math.floor(currentDate.getTime() / 1000);
+                // Try to open via calendar:// URI (XDG standard)
+                try {
+                    Util.spawnCommandLine(`xdg-open calendar:///?startdate=${epoch}`);
+                }
+                catch (e) {
+                    // Fallback to GNOME Calendar if URI fails
+                    Util.spawnCommandLine(`gnome-calendar --date=${epoch}`);
+                }
+            });
+            // Add buttons to footer
+            footerBox.add_actor(settingsBtn);
+            footerBox.add_actor(calendarBtn);
+            /**
+             * LAYOUT COMPOSITION
+             * ------------------
+             * Assemble the two-column layout:
+             *
+             * ┌─────────────────────────────────────────────┐
+             * │ EventListView │ Header + Calendar + Footer  │
+             * │ (Left Column) │ (Right Column)              │
+             * └─────────────────────────────────────────────┘
+             */
+            // 1. Create right column (traditional calendar view)
+            let rightColumn = new St.BoxLayout({
+                vertical: true,
+                style_class: 'calendar-right-column'
+            });
+            rightColumn.add_actor(headerBox);
+            rightColumn.add_actor(this.CalendarView.actor);
+            rightColumn.add_actor(footerBox);
+            // 2. Create horizontal bridge container
+            this._contentLayout = new St.BoxLayout({
+                vertical: false, // Side-by-side layout
+                style_class: 'calendar-content-layout'
+            });
+            // 3. Add left wing (events) and right column (calendar)
+            this._contentLayout.add_actor(this.eventListView.actor);
+            this._contentLayout.add_actor(rightColumn);
+            // 4. Final assembly: Add everything to main container
+            this._mainBox.add_actor(this._contentLayout);
+            // 5. Add main container to popup menu
+            this.menu.addActor(this._mainBox);
+            /* ====================================================
+             * PHASE 5: INITIALIZATION AND SIGNAL SETUP
+             * ==================================================== */
+            // Apply initial settings
+            this.on_settings_changed();
+            this.on_hotkey_changed();
+            /**
+             * MENU OPEN/CLOSE HANDLING
+             * -------------------------
+             * When menu opens:
+             * 1. Refresh calendar display
+             * 2. Update header to current date
+             * 3. Focus calendar for keyboard navigation
+             */
+            this.menu.connect("open-state-changed", (menu, isOpen) => {
+                if (isOpen) {
+                    this.CalendarView.render();
+                    this.setHeaderDate(new Date());
+                    // Small delay to ensure UI is ready before focusing
+                    GLib.timeout_add(GLib.PRIORITY_DEFAULT, 50, () => {
+                        this.CalendarView.actor.grab_key_focus();
+                        return false;
+                    });
+                }
+            });
+            // Initial panel label/tooltip update
+            this.update_label_and_tooltip();
+            // Start periodic updates (every 10 seconds)
+            this._updateId = GLib.timeout_add_seconds(GLib.PRIORITY_DEFAULT, 10, () => {
+                this.update_label_and_tooltip();
+                return true; // Continue timer
+            });
+        }
+        catch (e) {
+            // Log critical initialization failures
+            global.log(`[${this.uuid}] CRITICAL: Initialization failed: ${e}`);
         }
     }
+    /* ============================================================
+     * SETTINGS CHANGE HANDLER
+     * ============================================================
+     *
+     * Called automatically when ANY bound setting changes.
+     * Updates UI elements to reflect new settings.
+     */
+    on_settings_changed() {
+        // Toggle panel icon visibility
+        if (this.showIcon) {
+            this.set_applet_icon_name("office-calendar");
+            if (this._applet_icon_box)
+                this._applet_icon_box.show();
+        }
+        else {
+            this._hide_icon();
+        }
+        // Toggle event list visibility (left sidebar)
+        if (this.eventListView) {
+            if (this.showEvents) {
+                this.eventListView.actor.show();
+            }
+            else {
+                this.eventListView.actor.hide();
+            }
+        }
+        // Update panel label and tooltip
+        this.update_label_and_tooltip();
+        // If menu is open, re-render to reflect format changes
+        if (this.menu && this.menu.isOpen) {
+            this.CalendarView.render();
+        }
+    }
+    /* ============================================================
+     * HELPER: HIDE PANEL ICON
+     * ============================================================
+     *
+     * Cleanly hides the icon from the panel.
+     * Different Cinnamon versions handle empty icons differently.
+     */
+    _hide_icon() {
+        this.set_applet_icon_name("");
+        if (this._applet_icon_box) {
+            this._applet_icon_box.hide();
+        }
+    }
+    /* ============================================================
+     * PANEL CLICK HANDLER
+     * ============================================================
+     *
+     * Called by Cinnamon when user clicks the applet in the panel.
+     */
+    on_applet_clicked(event) {
+        // Refresh events if opening the menu
+        if (!this.menu.isOpen) {
+            this.eventManager.refresh();
+        }
+        // Toggle menu open/close
+        this.menu.toggle();
+    }
+    /* ============================================================
+     * HOTKEY CHANGE HANDLER
+     * ============================================================
+     *
+     * Updates global keyboard shortcut when setting changes.
+     */
+    on_hotkey_changed() {
+        // Remove old hotkey
+        Main.keybindingManager.removeHotKey(`${this.uuid}-open`);
+        // Register new hotkey if set
+        if (this.keyOpen) {
+            Main.keybindingManager.addHotKey(`${this.uuid}-open`, this.keyOpen, () => {
+                this.on_applet_clicked(null);
+            });
+        }
+    }
+    /* ============================================================
+     * PANEL LABEL AND TOOLTIP UPDATER
+     * ============================================================
+     *
+     * Updates the text shown in the Cinnamon panel and its tooltip.
+     * Runs periodically (every 10 seconds) to keep time accurate.
+     */
+    update_label_and_tooltip() {
+        const now = new Date();
+        const gNow = GLib.DateTime.new_now_local();
+        // Panel label (time display)
+        let timeLabel = this.useCustomFormat
+            ? gNow.format(this.customFormat)
+            : now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        // Tooltip (date display)
+        let dateTooltip = this.useCustomFormat
+            ? gNow.format(this.customTooltipFormat)
+            : now.toLocaleDateString([], {
+                weekday: 'long',
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+            });
+        this.set_applet_label(timeLabel || "");
+        this.set_applet_tooltip(dateTooltip || "");
+    }
+    /* ============================================================
+     * HEADER DATE UPDATER
+     * ============================================================
+     *
+     * Updates the header section in the popup menu.
+     * Shows day, date, and holiday information.
+     *
+     * @param date - The date to display in the header
+     */
+    setHeaderDate(date) {
+        if (!this._dayLabel || !this.CalendarView)
+            return;
+        const gDate = GLib.DateTime.new_from_unix_local(date.getTime() / 1000);
+        // Format: "Monday"
+        this._dayLabel.set_text(gDate.format("%A"));
+        // Format: "1. January 2026"
+        this._dateLabel.set_text(gDate.format("%e. %B %Y"));
+        // Check for holidays
+        const tagInfo = this.CalendarView.getHolidayForDate(date);
+        if (tagInfo && tagInfo.beschreibung) {
+            this._holidayLabel.set_text(tagInfo.beschreibung);
+            this._holidayLabel.show();
+        }
+        else {
+            this._holidayLabel.hide();
+        }
+    }
+    /* ============================================================
+     * CLEANUP HANDLER
+     * ============================================================
+     *
+     * Called when applet is removed from panel or Cinnamon restarts.
+     * Essential to prevent memory leaks and dangling resources.
+     */
+    on_applet_removed_from_panel() {
+        // Remove global hotkey
+        Main.keybindingManager.removeHotKey(`${this.uuid}-open`);
+        // Stop periodic update timer
+        if (this._updateId > 0) {
+            GLib.source_remove(this._updateId);
+        }
+        // Destroy menu and all UI elements
+        this.menu.destroy();
+    }
+    /* ============================================================
+     * ICS FILE IMPORT DIALOG
+     * ============================================================
+     *
+     * Opens a GTK file chooser to import .ics calendar files.
+     * Currently not connected in UI (commented out in CalendarView).
+     *
+     * TODO: This feature is disabled due to EDS import limitations.
+     */
+    _openICSFileChooser() {
+        const dialog = new Gtk.FileChooserDialog({
+            title: _("Import Calendar (.ics)"),
+            action: Gtk.FileChooserAction.OPEN,
+            modal: true,
+        });
+        dialog.add_button(_("Cancel"), Gtk.ResponseType.CANCEL);
+        dialog.add_button(_("Import"), Gtk.ResponseType.OK);
+        const filter = new Gtk.FileFilter();
+        filter.set_name("iCalendar (*.ics)");
+        filter.add_pattern("*.ics");
+        dialog.add_filter(filter);
+        dialog.connect("response", (_dlg, response) => {
+            if (response === Gtk.ResponseType.OK) {
+                const file = dialog.get_file();
+                if (file) {
+                    const path = file.get_path();
+                    if (path) {
+                        this.eventManager.importICSFile(path)
+                            .catch(e => {
+                            global.logError(`${this.uuid}: ICS import failed: ${e}`);
+                        });
+                    }
+                }
+            }
+            dialog.destroy();
+        });
+        dialog.show_all();
+    }
 }
-// ----------------------------------------------------------------------------
-// Required Entry Point
-// ----------------------------------------------------------------------------
-// Cinnamon looks specifically for a function named `main`.
-// It must return an instance of the applet class.
-function main(metadata, orientation, panelHeight, instanceId) {
-    return new ProjectITCalendarApplet(metadata, orientation, panelHeight, instanceId);
+/* ================================================================
+ * CINNAMON ENTRY POINT
+ * ================================================================
+ *
+ * Cinnamon calls this function to create the applet instance.
+ * Must be named 'main' exactly.
+ */
+function main(metadata, orientation, panel_height, instance_id) {
+    try {
+        return new UniversalCalendarApplet(metadata, orientation, panel_height, instance_id);
+    }
+    catch (e) {
+        // Log initialization errors to Cinnamon's global log
+        if (typeof global !== 'undefined') {
+            global.log(metadata.uuid + " CRITICAL: Initialization error: " + e);
+        }
+        return null;
+    }
 }
-// ----------------------------------------------------------------------------
-// TODOs (DOCUMENTATION ONLY – NO CODE CHANGES)
-// ----------------------------------------------------------------------------
-// TODO: Consider lazy-initializing CalendarView only when the menu is opened
-//       to reduce startup overhead.
-//
-// TODO: Consider explicit disconnect of EventManager signals on destroy
-//       for additional safety, although Cinnamon usually cleans this up.
-//
-// TODO: Evaluate whether CalendarLogic could be fully stateless and shared
-//       across multiple applet instances in the future.
-//
-// TODO: Add high-level architectural diagram to project documentation
-//       explaining the separation between View, Logic, and Manager.
-// ============================================================================
+/* ================================================================
+ * GLOBAL EXPORT (CINNAMON RUNTIME REQUIREMENT)
+ * ================================================================
+ *
+ * CRITICAL: Cinnamon loads applets by evaluating JS files.
+ * There is NO module system at runtime - everything must be global.
+ *
+ * This dual export pattern supports:
+ * 1. TypeScript/development environment (exports)
+ * 2. Cinnamon production runtime (global assignment)
+ */
+if (typeof global !== 'undefined') {
+    global.main = main;
+    global.main = main;
+    if (typeof Applet !== 'undefined') {
+        global.Applet = Applet;
+        global.Applet = Applet;
+    }
+}
+/* ================================================================
+ * TODOs (DOCUMENTATION ONLY - NO CODE CHANGES)
+ * ================================================================
+ *
+ * TODO: Add lazy loading for CalendarView to improve startup performance.
+ *
+ * TODO: Implement proper error boundaries for component initialization failures.
+ *
+ * TODO: Add comprehensive keyboard navigation between EventListView and CalendarView.
+ *
+ * TODO: Consider extracting the two-column layout into a reusable LayoutManager class.
+ *
+ * TODO: Add support for calendar color theme synchronization with system theme.
+ *
+ * TODO: Implement drag-and-drop event creation in month view.
+ *
+ * TODO: Add export functionality (current month events to .ics).
+ */ 
