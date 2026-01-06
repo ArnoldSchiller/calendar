@@ -171,6 +171,8 @@ msgstr "Kalender importieren (.ics)"
 
 
 ### For Developers:
+*Please read the addendum at the end of this README!*
+
 ```bash
 # Clone repository
 git clone https://github.com/ArnoldSchiller/calendar.git
@@ -204,6 +206,9 @@ ln -s "$PWD/files/calendar@projektit.de" ~/.local/share/cinnamon/applets/
 - Installs as `calendar-dev@projektit.de`
 
 ### Production Mode (Bundled):
+
+*Please read the addendum at the end of this README!*
+
 ```bash
 ./build.sh prod
 ```
