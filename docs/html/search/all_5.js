@@ -1,0 +1,27 @@
+var searchData=
+[
+  ['ca_2ejson_0',['ca.json',['../d9/d87/ca_8json.html',1,'']]],
+  ['calendar_1',['calendar',['../d4/d40/md_CHANGELOG.html',1,'Changelog - Projekt IT Calendar'],['../index.html',1,'Projekt IT Calendar'],['../dd/d3e/md_README_8de.html',1,'Projekt IT Calendar']]],
+  ['calendarday_2ejs_2',['CalendarDay.js',['../d6/d95/CalendarDay_8js.html',1,'']]],
+  ['calendarday_2ets_3',['CalendarDay.ts',['../d8/d2d/CalendarDay_8ts.html',1,'']]],
+  ['calendarlogic_2ejs_4',['CalendarLogic.js',['../d4/d9a/CalendarLogic_8js.html',1,'']]],
+  ['calendarlogic_2ets_5',['CalendarLogic.ts',['../de/db7/CalendarLogic_8ts.html',1,'']]],
+  ['calendarview_2ejs_6',['CalendarView.js',['../db/de3/CalendarView_8js.html',1,'']]],
+  ['calendarview_2ets_7',['CalendarView.ts',['../d5/dac/CalendarView_8ts.html',1,'']]],
+  ['changelog_20projekt_20it_20calendar_8',['Changelog - Projekt IT Calendar',['../d4/d40/md_CHANGELOG.html',1,'']]],
+  ['changelog_2emd_9',['CHANGELOG.md',['../d3/d02/CHANGELOG_8md.html',1,'']]],
+  ['cinnamon_20settings_20_3a_10',['cinnamon settings :',['../index.html#autotoc_md47',1,'Settings (via Cinnamon Settings):'],['..//home/schiller/projektit/calendar/README.md#autotoc_md114',1,'Settings (via Cinnamon Settings):']]],
+  ['common_20issues_3a_11',['common issues:',['..//home/schiller/projektit/calendar/README.md#autotoc_md120',1,'Common Issues:'],['../index.html#autotoc_md53',1,'Common Issues:']]],
+  ['comparison_12',['comparison',['..//home/schiller/projektit/calendar/README.md#autotoc_md92',1,'🔬 Technical Comparison'],['../index.html#autotoc_md25',1,'🔬 Technical Comparison']]],
+  ['components_3a_13',['components:',['../index.html#autotoc_md34',1,'Core Components:'],['..//home/schiller/projektit/calendar/README.md#autotoc_md101',1,'Core Components:']]],
+  ['configuration_20files_3a_14',['configuration files:',['../index.html#autotoc_md38',1,'Configuration Files:'],['..//home/schiller/projektit/calendar/README.md#autotoc_md105',1,'Configuration Files:']]],
+  ['configuration_3a_15',['configuration:',['../index.html#autotoc_md31',1,'TypeScript Configuration:'],['..//home/schiller/projektit/calendar/README.md#autotoc_md98',1,'TypeScript Configuration:']]],
+  ['contact_20links_16',['contact links',['..//home/schiller/projektit/calendar/README.md#autotoc_md134',1,'🌐 Contact &amp; Links'],['../index.html#autotoc_md67',1,'🌐 Contact &amp; Links']]],
+  ['contributing_17',['contributing',['../index.html#autotoc_md62',1,'👥 Contributing'],['..//home/schiller/projektit/calendar/README.md#autotoc_md129',1,'👥 Contributing']]],
+  ['contributions_3a_18',['contributions:',['../index.html#autotoc_md63',1,'Translation Contributions:'],['..//home/schiller/projektit/calendar/README.md#autotoc_md130',1,'Translation Contributions:']]],
+  ['core_20components_3a_19',['core components:',['..//home/schiller/projektit/calendar/README.md#autotoc_md101',1,'Core Components:'],['../index.html#autotoc_md34',1,'Core Components:']]],
+  ['cs_2ejson_20',['cs.json',['../da/d6a/cs_8json.html',1,'']]],
+  ['current_20focus_21',['current focus',['../index.html#autotoc_md60',1,'🛠 Current Focus'],['..//home/schiller/projektit/calendar/README.md#autotoc_md127',1,'🛠 Current Focus']]],
+  ['currently_20supported_20languages_3a_22',['currently supported languages:',['..//home/schiller/projektit/calendar/README.md#autotoc_md88',1,'Currently Supported Languages:'],['../index.html#autotoc_md21',1,'Currently Supported Languages:']]],
+  ['customization_23',['customization',['../index.html#autotoc_md46',1,'🎨 Customization'],['..//home/schiller/projektit/calendar/README.md#autotoc_md113',1,'🎨 Customization']]]
+];

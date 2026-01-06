@@ -1,0 +1,26 @@
+var searchData=
+[
+  ['search_2ejs_0',['search.js',['../d2/d19/search_8js.html',1,'']]],
+  ['searchdata_2ejs_1',['searchdata.js',['../df/d80/searchdata_8js.html',1,'']]],
+  ['settings_20via_20cinnamon_20settings_20_3a_2',['settings via cinnamon settings :',['../index.html#autotoc_md47',1,'Settings (via Cinnamon Settings):'],['..//home/schiller/projektit/calendar/README.md#autotoc_md114',1,'Settings (via Cinnamon Settings):']]],
+  ['settings_2dschema_2ejson_3',['settings-schema.json',['../d8/dae/settings-schema_8json.html',1,'(Global Namespace)'],['../d9/d7f/files_2calendar_0dprojektit_8de_2settings-schema_8json.html',1,'(Global Namespace)']]],
+  ['si_2ejson_4',['si.json',['../d6/db8/si_8json.html',1,'']]],
+  ['sk_2ejson_5',['sk.json',['../da/dcc/sk_8json.html',1,'']]],
+  ['sl_2ejson_6',['sl.json',['../d9/d9f/sl_8json.html',1,'']]],
+  ['smart_20translation_20strategy_3a_7',['smart translation strategy:',['..//home/schiller/projektit/calendar/README.md#autotoc_md85',1,'Smart Translation Strategy:'],['../index.html#autotoc_md18',1,'Smart Translation Strategy:']]],
+  ['sources_3a_8',['sources:',['../index.html#autotoc_md43',1,'Supported Sources:'],['..//home/schiller/projektit/calendar/README.md#autotoc_md110',1,'Supported Sources:']]],
+  ['specific_20translations_3a_9',['specific translations:',['../index.html#autotoc_md22',1,'Adding Applet-Specific Translations:'],['..//home/schiller/projektit/calendar/README.md#autotoc_md89',1,'Adding Applet-Specific Translations:']]],
+  ['sr_2ejson_10',['sr.json',['../d9/da0/sr_8json.html',1,'']]],
+  ['sr_40ijekavian_2ejson_11',['sr@ijekavian.json',['../d2/da0/sr_0dijekavian_8json.html',1,'']]],
+  ['sr_40ijekavianlatin_2ejson_12',['sr@ijekavianlatin.json',['../db/d86/sr_0dijekavianlatin_8json.html',1,'']]],
+  ['sr_40latin_2ejson_13',['sr@latin.json',['../d9/dcd/sr_0dlatin_8json.html',1,'']]],
+  ['strategy_3a_14',['strategy:',['../index.html#autotoc_md18',1,'Smart Translation Strategy:'],['..//home/schiller/projektit/calendar/README.md#autotoc_md85',1,'Smart Translation Strategy:']]],
+  ['structure_15',['structure',['../index.html#autotoc_md13',1,'🏗️ Project Structure'],['..//home/schiller/projektit/calendar/README.md#autotoc_md80',1,'🏗️ Project Structure']]],
+  ['styling_3a_16',['styling:',['..//home/schiller/projektit/calendar/README.md#autotoc_md115',1,'Styling:'],['../index.html#autotoc_md48',1,'Styling:']]],
+  ['supported_20languages_3a_17',['supported languages:',['..//home/schiller/projektit/calendar/README.md#autotoc_md88',1,'Currently Supported Languages:'],['../index.html#autotoc_md21',1,'Currently Supported Languages:']]],
+  ['supported_20sources_3a_18',['supported sources:',['../index.html#autotoc_md43',1,'Supported Sources:'],['..//home/schiller/projektit/calendar/README.md#autotoc_md110',1,'Supported Sources:']]],
+  ['sv_2ejson_19',['sv.json',['../dd/d1a/sv_8json.html',1,'']]],
+  ['svg_2emin_2ejs_20',['svg.min.js',['../dc/dfd/svg_8min_8js.html',1,'']]],
+  ['system_21',['system',['../index.html#autotoc_md37',1,'📊 Holiday System'],['..//home/schiller/projektit/calendar/README.md#autotoc_md104',1,'📊 Holiday System']]],
+  ['system_20architecture_22',['System Architecture',['../dc/da6/architecture.html#autotoc_md7',1,'']]]
+];

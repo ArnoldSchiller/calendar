@@ -1,0 +1,26 @@
+var searchData=
+[
+  ['da_2ejson_0',['da.json',['../d9/d0b/da_8json.html',1,'']]],
+  ['de_2ejson_1',['de.json',['../d0/dc6/de_8json.html',1,'']]],
+  ['debugging_2',['debugging',['..//home/schiller/projektit/calendar/README.md#autotoc_md117',1,'🐛 Debugging'],['../index.html#autotoc_md50',1,'🐛 Debugging']]],
+  ['decisions_3a_3',['decisions:',['..//home/schiller/projektit/calendar/README.md#autotoc_md102',1,'Key Design Decisions:'],['../index.html#autotoc_md35',1,'Key Design Decisions:']]],
+  ['declarations_2ed_2ets_4',['declarations.d.ts',['../de/d4f/declarations_8d_8ts.html',1,'']]],
+  ['default_2ejson_5',['default.json',['../d6/dd9/default_8json.html',1,'']]],
+  ['dependencies_6',['📦 Dependencies',['../d4/d40/md_CHANGELOG.html#autotoc_md6',1,'']]],
+  ['description_7',['Description',['../dc/da6/architecture.html#autotoc_md8',1,'']]],
+  ['design_20decisions_3a_8',['design decisions:',['..//home/schiller/projektit/calendar/README.md#autotoc_md102',1,'Key Design Decisions:'],['../index.html#autotoc_md35',1,'Key Design Decisions:']]],
+  ['detection_3a_9',['detection:',['..//home/schiller/projektit/calendar/README.md#autotoc_md107',1,'Locale Detection:'],['../index.html#autotoc_md40',1,'Locale Detection:']]],
+  ['developers_3a_10',['developers:',['..//home/schiller/projektit/calendar/README.md#autotoc_md93',1,'For Developers:'],['../index.html#autotoc_md26',1,'For Developers:']]],
+  ['development_20mode_20modular_20_3a_11',['development mode modular :',['..//home/schiller/projektit/calendar/README.md#autotoc_md96',1,'Development Mode (Modular):'],['../index.html#autotoc_md29',1,'Development Mode (Modular):']]],
+  ['development_20tools_3a_12',['development tools:',['../index.html#autotoc_md52',1,'Development Tools:'],['..//home/schiller/projektit/calendar/README.md#autotoc_md119',1,'Development Tools:']]],
+  ['dir_5f0936845b427f317c8bb21fff89f854d2_2ejs_13',['dir_0936845b427f317c8bb21fff89f854d2.js',['../d7/d7a/dir__0936845b427f317c8bb21fff89f854d2_8js.html',1,'']]],
+  ['dir_5f49e56c817e5e54854c35e136979f97ca_2ejs_14',['dir_49e56c817e5e54854c35e136979f97ca.js',['../da/deb/dir__49e56c817e5e54854c35e136979f97ca_8js.html',1,'']]],
+  ['dir_5f68267d1309a1af8e8297ef4c3efbcdba_2ejs_15',['dir_68267d1309a1af8e8297ef4c3efbcdba.js',['../df/d19/dir__68267d1309a1af8e8297ef4c3efbcdba_8js.html',1,'']]],
+  ['dir_5f94170ec64cb3843443ef9b196933d1ba_2ejs_16',['dir_94170ec64cb3843443ef9b196933d1ba.js',['../d8/d27/dir__94170ec64cb3843443ef9b196933d1ba_8js.html',1,'']]],
+  ['dir_5f9cba3ccb450b89ac6f0c2a18abcbadf0_2ejs_17',['dir_9cba3ccb450b89ac6f0c2a18abcbadf0.js',['../db/da1/dir__9cba3ccb450b89ac6f0c2a18abcbadf0_8js.html',1,'']]],
+  ['dir_5fcf4224f0cf7261f96373017d0b426a01_2ejs_18',['dir_cf4224f0cf7261f96373017d0b426a01.js',['../df/d78/dir__cf4224f0cf7261f96373017d0b426a01_8js.html',1,'']]],
+  ['dir_5fd041291c03f2c20465841b6aca0b69a5_2ejs_19',['dir_d041291c03f2c20465841b6aca0b69a5.js',['../d9/dd0/dir__d041291c03f2c20465841b6aca0b69a5_8js.html',1,'']]],
+  ['docs_20architecture_20dot_20architecture_20dot_20a_20em_20',['&lt;em&gt;Generated from &lt;a href=&quot;docs/architecture.dot&quot; &gt;architecture.dot&lt;/a&gt;&lt;/em&gt;',['..//home/schiller/projektit/calendar/README.md#autotoc_md103',1,'']]],
+  ['dot_20architecture_20dot_20a_20em_21',['&lt;em&gt;Generated from &lt;a href=&quot;docs/architecture.dot&quot; &gt;architecture.dot&lt;/a&gt;&lt;/em&gt;',['..//home/schiller/projektit/calendar/README.md#autotoc_md103',1,'']]],
+  ['dynsections_2ejs_22',['dynsections.js',['../d7/dc3/dynsections_8js.html',1,'']]]
+];

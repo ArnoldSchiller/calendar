@@ -230,9 +230,6 @@ ln -s "$PWD/files/calendar@projektit.de" ~/.local/share/cinnamon/applets/
 - **Separation of Concerns:** Logic, UI, and data management in separate modules
 - **GJS Compatibility:** Uses native GLib/Gio instead of Node.js APIs
 
-![System Architecture](docs/images/architecture.svg)
-
-*Generated from [architecture.dot](docs/architecture.dot)*
 ---
 
 ## 📊 Holiday System

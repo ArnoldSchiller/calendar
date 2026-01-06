@@ -1,0 +1,51 @@
+digraph architecture {
+    rankdir=TB;
+    node [shape=box, style=filled, fillcolor=lightblue];
+    
+    // Main applet
+    UniversalCalendarApplet [label="UniversalCalendarApplet\n(Main Controller)", shape=ellipse, fillcolor=lightyellow];
+    
+    // Model layer
+    subgraph cluster_model {
+        label="Model Layer";
+        color=blue;
+        EventManager [label="EventManager\n(Data Management)"];
+        CalendarLogic [label="CalendarLogic\n(Business Logic)"];
+    }
+    
+    // View layer
+    subgraph cluster_view {
+        label="View Layer";
+        color=green;
+        CalendarView [label="CalendarView\n(Grid UI)"];
+        EventListView [label="EventListView\n(Sidebar)"];
+    }
+    
+    // External systems
+    subgraph cluster_external {
+        label="External Systems";
+        color=red;
+        CinnamonCalendarServer [label="Cinnamon CalendarServer\n(DBus)", shape=cylinder];
+        EvolutionDataServer [label="Evolution Data Server\n(EDS)", shape=cylinder];
+        GSettings [label="GSettings\n(Configuration)", shape=cylinder];
+    }
+    
+    // Data flow
+    UniversalCalendarApplet -> EventManager;
+    UniversalCalendarApplet -> CalendarLogic;
+    UniversalCalendarApplet -> CalendarView;
+    UniversalCalendarApplet -> EventListView;
+    
+    EventManager -> CinnamonCalendarServer [label="DBus (Read)"];
+    EventManager -> EvolutionDataServer [label="libecal (Write)"];
+    CalendarView -> EventManager [label="Fetch Events"];
+    EventListView -> EventManager [label="Fetch Events"];
+    CalendarLogic -> UniversalCalendarApplet [label="Holiday Data"];
+    
+    // Settings
+    UniversalCalendarApplet -> GSettings [label="Load/Save"];
+    
+    // Internal connections
+    CalendarView -> EventListView [label="Date Navigation"];
+    EventListView -> CalendarView [label="Event Click"];
+}
