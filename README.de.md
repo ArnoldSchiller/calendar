@@ -99,6 +99,38 @@ Dieses Projekt steht unter der **GPL-3.0 License**.
 Autor: Projekt IT
 UUID: `calendar@projektit.de`
 
+Die englische Readme ist umfangreicher. Ich pflege das jetzt nicht doppelt.
+Das Projekt ist jetzt wie es ist. Aus verschiedenen Gründen, erweitere ich es nicht mehr.
+Werde es auch nicht weiterentwickeln. Es hat die Grenzen des Cinnamon Applet ausgeschöpft.
+Alles weitere ist nicht im Sinne eines Applet.
+
+
+
+## 📄 License
+
+This project is licensed under the **GPL-3.0-or-later License**.
+
+---
+
+## 🌐 Contact & Links
+
+**Author:** Arnold Schiller  
+**UUID:** `calendar@projektit.de`  
+**GitHub:** https://github.com/ArnoldSchiller/calendar  
+**Project Page:** https://projektit.de/kalender  
+**Cinnamon Spices:** https://cinnamon-spices.linuxmint.com/applets
+
+---
+
+## 🙏 Acknowledgments
+
+- **Cinnamon Team** for the excellent desktop environment
+- **GNOME/GTK** for the underlying technologies
+- **TypeScript** for bringing modern JavaScript to Cinnamon
+- **All Contributors** who help improve this applet
+```
+
+
 ```
 
 ---

@@ -46,6 +46,23 @@
  * @link https://projektit.de/kalender
  * @license GPL-3.0-or-later
  */
+/**
+ * @file applet.ts
+ * @brief Main entry point for the Cinnamon Calendar Applet
+ * 
+ * @details This file implements the UniversalCalendarApplet class which acts as the 
+ * central controller in the MVC architecture. It orchestrates all components and 
+ * manages the complete UI lifecycle.
+ * 
+ * @author Arnold Schiller <calendar@projektit.de>
+ * @date 2026
+ * @copyright GPL-3.0-or-later
+ * 
+ * @see CalendarView
+ * @see EventManager
+ * @see CalendarLogic
+ * @see EventListView
+ */
 
 /* ================================================================
  * CINNAMON / GJS IMPORTS
@@ -131,6 +148,19 @@ function setupLocalization(uuid: string, path: string) {
  * 
  * Extends TextIconApplet which supports both text label and icon
  * in the Cinnamon panel.
+ */
+/**
+ * @class UniversalCalendarApplet
+ * @extends Applet.TextIconApplet
+ * @brief Main applet controller class
+ *
+ * @details This class is instantiated by Cinnamon when the applet is loaded.
+ * It handles:
+ * - Component initialization and wiring
+ * - Settings management
+ * - UI layout assembly
+ * - Signal routing between components
+ * - Hotkey and panel integration
  */
 
 class UniversalCalendarApplet extends Applet.TextIconApplet {
@@ -281,6 +311,20 @@ class UniversalCalendarApplet extends Applet.TextIconApplet {
      * 1. Backend initialization (settings, managers, logic)
      * 2. UI construction (layout, components, wiring)
      * 3. Signal connections and final setup
+     */
+     /**
+     * @brief Constructs the UniversalCalendarApplet
+     * 
+     * @param metadata Applet metadata from Cinnamon
+     * @param orientation Panel orientation (horizontal/vertical)
+     * @param panelHeight Height of the panel in pixels
+     * @param instanceId Unique instance identifier
+     * 
+     * @note Called automatically by Cinnamon when the applet is loaded.
+     * The constructor is organized in clear phases:
+     * 1. Backend initialization
+     * 2. UI construction
+     * 3. Signal connections
      */
 
     constructor(metadata: any, orientation: any, panel_height: number, instance_id: number) {
@@ -591,6 +635,14 @@ class UniversalCalendarApplet extends Applet.TextIconApplet {
      * ============================================================
      * 
      * Called by Cinnamon when user clicks the applet in the panel.
+     */
+    /**
+     * @brief Handles panel icon clicks
+     * 
+     * @param event The click event from Cinnamon
+     * 
+     * @note Called automatically by Cinnamon when user clicks the panel icon.
+     * Toggles the popup menu and refreshes events if opening.
      */
 
     on_applet_clicked(event: any): void {

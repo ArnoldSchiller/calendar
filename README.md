@@ -327,14 +327,6 @@ journalctl -f -o cat /usr/bin/cinnamon 2>&1 | grep -E "calendar@projektit|Calend
 
 ---
 
-## 🚀 Roadmap / TODO
-
-### Planned Features:
-- [ ] **ICS File Import** - Direct import of .ics calendar files
-- [ ] **Additional Holiday Regions** - More countries and regions
-- [ ] **Custom Holiday Definitions** - User-defined holidays
-- [ ] **Theme Integration** - Better Cinnamon theme compatibility
-- [ ] **Weather Integration** - Weather forecasts in day view
 
 ### Known Limitations:
 ### Updated Known Limitations & Roadmap
@@ -346,16 +338,7 @@ journalctl -f -o cat /usr/bin/cinnamon 2>&1 | grep -E "calendar@projektit|Calend
     * **Reason:** The JavaScript bindings for the Evolution Data Server (EDS) are unreliable when handling complex iCalendar objects. While the C-based backend (Evolution/GNOME Calendar) works perfectly, the "bridge" to JavaScript (GJS) often fails to map properties like `DESCRIPTION` or `LOCATION` correctly when creating new objects.
     * **Impact:** Attempting to import external `.ics` files would lead to frequent crashes. For reliability, this feature has been moved from "Planned" to "Unsupported" until the upstream GJS bindings improve.
 
-#### 🛠 Current Focus
 
-- [x] **Smart Merge:** Modifying existing events works reliably (as it reuses server-side object structures).
-- [x] **Reliable Creation:** New events can be created with titles and correct time/date/all-day logic.
-- [ ] **Additional Holiday Regions:** Expanding beyond Europe.
-- [ ] **Theme Integration:** Improving CSS compatibility with diverse Cinnamon themes.
-
-- ICS import requires file dialog implementation (Tja das ist nicht das Problem GIR/GJS stoppt mich)
-- Some calendar server features depend on Evolution configuration (wäre auch nicht das Problem)
-- Regional holiday coverage is currently Europe-focused (Ist es eigentlich nicht, die Implementation ist weiter)
 
 ---
 

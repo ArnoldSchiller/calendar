@@ -38,6 +38,32 @@
  * @author Arnold Schiller
  * @license GPL-3.0-or-later
  */
+/**
+ * @file CalendarView.ts
+ * @brief Main calendar UI component
+ * 
+ * @details Implements the visual calendar grid with month/year/day views.
+ * Uses Cinnamon's St toolkit for rendering and Clutter for input handling.
+ * 
+ * @author Arnold Schiller <calendar@projektit.de>
+ * @date 2023-2026
+ * @copyright GPL-3.0-or-later
+ */
+
+/**
+ * @class CalendarView
+ * @brief State-driven UI component for calendar display
+ * 
+ * @details This class manages all calendar UI rendering including:
+ * - Month grid view with navigation
+ * - Year overview
+ * - Day detail view
+ * - Event highlighting and tooltips
+ * 
+ * @note Does NOT store event data itself. Relies on EventManager for data
+ * and CalendarLogic for date calculations.
+ */
+
 
 /* ================================================================
  * GJS / CINNAMON IMPORTS
@@ -114,6 +140,18 @@ function _(str: string): string {
  * Any state change triggers a full re-render.
  */
 
+/**
+ * @class CalendarView
+ * @brief Main calendar view class
+ * 
+ * @details For detailed documentation see the main class documentation.
+ */
+/**
+ * @class CalendarView
+ * @brief Main calendar view class
+ * 
+ * @details For detailed documentation see the main class documentation.
+ */
 export class CalendarView {
     public applet: any;
     public actor: any;
@@ -134,6 +172,10 @@ export class CalendarView {
      * - MONTH: default grid view
      * - YEAR: year overview
      * - DAY: single-day detail view
+     */
+       /**
+     * @enum ViewMode
+     * @brief Available view modes
      */
     private currentView: "MONTH" | "YEAR" | "DAY" = "MONTH";
 
@@ -631,6 +673,17 @@ export class CalendarView {
      * synchronizes external views.
      */
 
+     /**
+     * @brief Renders the complete calendar UI
+     *
+     * @details This is the central render dispatcher that:
+     * 1. Rebuilds navigation bar
+     * 2. Renders appropriate view based on currentView
+     * 3. Updates external views (EventListView)
+     * 4. Adds footer
+     *
+     * post UI is completely updated to reflect current state
+     */
     public render(): void {
         this.renderNav();
         this.contentBox.destroy_children();

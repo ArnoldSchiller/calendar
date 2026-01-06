@@ -1,4 +1,15 @@
 /**
+/**
+ * @file EventListView.ts
+ * @brief Event sidebar UI component
+ * 
+ * @details Displays events in list format with scrollable container and navigation support.
+ * 
+ * @author Arnold Schiller <calendar@projektit.de>
+ * @date 2023-2026
+ * @copyright GPL-3.0-or-later
+ */
+/*
  * Project IT Calendar - Event List View Component
  * ----------------------------------------------
  * This component handles the rendering of the event list shown next to or 
@@ -36,6 +47,18 @@ export interface EventListView extends Signals.Signals {}
 /**
  * EventListView Class
  * Manages the UI for the event sidebar/agenda.
+ */
+/**
+ * @class EventListView
+ * @brief Main eventlist view class
+ * 
+ * @details For detailed documentation see the main class documentation.
+ */
+/**
+ * @class EventListView
+ * @brief Main eventlist view class
+ * 
+ * @details For detailed documentation see the main class documentation.
  */
 export class EventListView {
     public actor: any;             // The main container (St.BoxLayout)

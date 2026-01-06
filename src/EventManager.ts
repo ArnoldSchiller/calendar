@@ -83,6 +83,29 @@
  * @link https://projektit.de/kalender
  * @license GPL-3.0-or-later
  */
+/**
+ * @file EventManager.ts
+ * @brief Core data management layer for calendar events
+ * 
+ * @details Handles all calendar event operations including synchronization
+ * with Evolution Data Server, ICS import, and event caching.
+ * 
+ * @warning This component works around several Cinnamon/GJS limitations
+ * including read-only CalendarServer and complex EDS write operations.
+ * 
+ * @author Arnold Schiller <calendar@projektit.de>
+ * @date 2023-2026
+ * @copyright GPL-3.0-or-later
+ */
+
+/**
+ * interface EventData
+ * @brief Internal representation of a calendar event
+ * 
+ * @note This structure is optimized for the applet's internal use
+ * and may not map 1:1 with EDS/ICS representations.
+ */
+
 
 /* ================================================================
  * GJS / CINNAMON IMPORTS
@@ -117,6 +140,32 @@ const EDataServer = imports.gi.EDataServer; // Evolution Data Server
  * Note: This structure is optimized for the applet's internal use
  * and may not map 1:1 with EDS/ICS representations.
  */
+/* Event Data
+    /** @brief Unique event identifier */
+    /** @brief Calendar source identifier (EDS source UID) */
+    /** @brief Event start time */
+    /** @brief Event end time (for all-day: next day 00:00) */
+    /** @brief Event title/summary */
+    /** @brief Event description (optional) */
+    /** @brief Calendar color in hex format */
+    /** @brief All-day event flag */
+
+/**
+ * @class EventManager
+ * @extends Signals.Signals
+ * @brief Manages all calendar event operations
+ * 
+ * @details Primary responsibilities:
+ * - DBus communication with Cinnamon.CalendarServer (read)
+ * - EDS write operations via libecal (create/modify)
+ * - Event caching and filtering
+ * - ICS file import (experimental)
+ * 
+ * @note This is a PURE DATA LAYER component with no UI dependencies.
+ */
+
+
+
 export interface EventData {
     id: string;           // Unique event identifier
     sourceUid: string;    // Calendar source identifier (EDS source UID)
@@ -157,6 +206,18 @@ export interface EventManager extends Signals.Signals {}
  * 4. Cleanup: Automatically handled by Cinnamon
  */
 
+/**
+ * @class EventManager
+ * @brief Main event manager class
+ * 
+ * @details For detailed documentation see the main class documentation.
+ */
+/**
+ * @class EventManager
+ * @brief Main event manager class
+ * 
+ * @details For detailed documentation see the main class documentation.
+ */
 export class EventManager {
     /* ============================================================
      * PRIVATE PROPERTIES

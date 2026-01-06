@@ -1,4 +1,14 @@
 /**
+ * @file CalendarLogic.ts
+ * @brief Business logic for holiday and date calculations
+ * 
+ * @details Pure logic component for date mathematics and holiday detection with regional rules.
+ * 
+ * @author Arnold Schiller <calendar@projektit.de>
+ * @date 2023-2026
+ * @copyright GPL-3.0-or-later
+ */
+/*
  * Project IT Calendar - Business Logic Core (Holiday & Date Calculations)
  * =======================================================================
  * 
@@ -202,6 +212,18 @@ export interface Holiday {
  * - No network calls or blocking I/O after initialization
  */
 
+/**
+ * @class CalendarLogic
+ * @brief Main calendarlogic class
+ * 
+ * @details For detailed documentation see the main class documentation.
+ */
+/**
+ * @class CalendarLogic
+ * @brief Main calendarlogic class
+ * 
+ * @details For detailed documentation see the main class documentation.
+ */
 export class CalendarLogic {
     /**
      * In-memory cache of holiday rules by region.
