@@ -1,4 +1,23 @@
-# Project IT Calendar - Doxygen Konfiguration
+# Bessere Navigation und Gruppierung
+USE_MDFILE_AS_MAINPAGE    = README.md
+MAINPAGE_DOXYGEN_STYLE    = YES
+DISABLE_INDEX             = NO
+GENERATE_TREEVIEW         = YES
+TREEVIEW_WIDTH            = 300
+
+# Reihenfolge der Seiten im Menü
+ALPHABETICAL_INDEX        = NO
+SORT_MEMBER_DOCS          = NO
+SORT_BRIEF_DOCS           = NO
+SORT_GROUP_NAMES          = YES
+SORT_BY_SCOPE_NAME        = NO
+
+# Gruppierungseinstellungen
+GROUP_NESTED_COMPOUNDS    = YES
+SUBGROUPING               = YES
+
+# Tab-Reihenfolge (kritisch!)
+TOC_INCLUDE_HEADINGS      = 2# Project IT Calendar - Doxygen Konfiguration
 # ===========================================
 
 # Project information
