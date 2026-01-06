@@ -25,7 +25,27 @@
 var NAVTREE =
 [
   [ "Project IT Calendar", "index.html", [
-    [ "Projekt IT Calendar", "index.html", "index" ],
+    [ "Project IT Calendar 1.0.0", "index.html", "index" ],
+    [ "Changelog - Projekt IT Calendar", "d4/d40/md_CHANGELOG.html", [
+      [ "v1.0.0 (Rewrite 2026)", "d4/d40/md_CHANGELOG.html#autotoc_md1", null ]
+    ] ],
+    [ "Architecture Overview", "dc/da6/architecture.html", [
+      [ "System Architecture", "dc/da6/architecture.html#autotoc_md2", [
+        [ "Description", "dc/da6/architecture.html#autotoc_md3", null ]
+      ] ]
+    ] ],
+    [ "Project IT Calendar 1.0.0", "d7/d46/md_docs_2html_2mainpage.html", [
+      [ "Clone repository", "d7/d46/md_docs_2html_2mainpage.html#autotoc_md5", null ],
+      [ "Development build (modular files)", "d7/d46/md_docs_2html_2mainpage.html#autotoc_md6", null ],
+      [ "Production build (single applet.js)", "d7/d46/md_docs_2html_2mainpage.html#autotoc_md7", null ],
+      [ "Test in Cinnamon", "d7/d46/md_docs_2html_2mainpage.html#autotoc_md8", null ],
+      [ "Copy to applets directory or use symlink", "d7/d46/md_docs_2html_2mainpage.html#autotoc_md9", null ],
+      [ "Monitor Cinnamon logs for applet errors", "d7/d46/md_docs_2html_2mainpage.html#autotoc_md10", null ]
+    ] ],
+    [ "Projekt IT Calendar", "dd/d3e/md_README_8de.html", [
+      [ "📝 Beschreibung", "dd/d3e/md_README_8de.html#autotoc_md52", null ],
+      [ "⚙️ Installation (Entwickler)", "dd/d3e/md_README_8de.html#autotoc_md54", null ]
+    ] ],
     [ "Files", "files.html", [
       [ "File List", "files.html", "files_dup" ]
     ] ]
@@ -34,8 +54,7 @@ var NAVTREE =
 
 var NAVTREEINDEX =
 [
-"d0/d11/all__4_8js.html",
-"db/d86/sr_0dijekavianlatin_8json.html"
+"d0/d4d/uk_8json.html"
 ];
 
 var SYNCONMSG = 'click to disable panel synchronisation';

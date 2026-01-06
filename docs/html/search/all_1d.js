@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['🎨_20customization_0',['🎨 customization',['../index.html#autotoc_md23',1,'🎨 Customization'],['..//home/schiller/projektit/calendar/README.md#autotoc_md61',1,'🎨 Customization']]]
+  ['🌟_20features_0',['🌟 features',['..//home/schiller/projektit/calendar/docs/README.md#autotoc_md20',1,'🌟 Features'],['..//home/schiller/projektit/calendar/README.md#autotoc_md58',1,'🌟 Features']]]
 ];

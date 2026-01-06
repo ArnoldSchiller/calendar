@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['🚀_20roadmap_20todo_0',['🚀 roadmap todo',['../index.html#autotoc_md27',1,'🚀 Roadmap / TODO'],['..//home/schiller/projektit/calendar/README.md#autotoc_md65',1,'🚀 Roadmap / TODO']]]
+  ['🙏_20acknowledgments_0',['🙏 acknowledgments',['..//home/schiller/projektit/calendar/docs/README.md#autotoc_md49',1,'🙏 Acknowledgments'],['..//home/schiller/projektit/calendar/README.md#autotoc_md86',1,'🙏 Acknowledgments']]]
 ];

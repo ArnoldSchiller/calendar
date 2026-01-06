@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['🔧_20building_0',['🔧 building',['../index.html#autotoc_md15',1,'🔧 Building'],['..//home/schiller/projektit/calendar/README.md#autotoc_md53',1,'🔧 Building']]]
+  ['🔌_20event_20integration_0',['🔌 event integration',['..//home/schiller/projektit/calendar/docs/README.md#autotoc_md35',1,'🔌 Event Integration'],['..//home/schiller/projektit/calendar/README.md#autotoc_md73',1,'🔌 Event Integration']]]
 ];

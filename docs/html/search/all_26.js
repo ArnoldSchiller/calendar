@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['🔬_20technical_20comparison_0',['🔬 technical comparison',['../index.html#autotoc_md13',1,'🔬 Technical Comparison'],['..//home/schiller/projektit/calendar/README.md#autotoc_md51',1,'🔬 Technical Comparison']]]
+  ['🔧_20building_0',['🔧 building',['..//home/schiller/projektit/calendar/docs/README.md#autotoc_md29',1,'🔧 Building'],['..//home/schiller/projektit/calendar/README.md#autotoc_md67',1,'🔧 Building']]]
 ];

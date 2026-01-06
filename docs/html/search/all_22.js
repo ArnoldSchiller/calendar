@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['📊_20holiday_20system_0',['📊 holiday system',['../index.html#autotoc_md19',1,'📊 Holiday System'],['..//home/schiller/projektit/calendar/README.md#autotoc_md57',1,'📊 Holiday System']]]
+  ['📄_20license_0',['📄 license',['..//home/schiller/projektit/calendar/docs/README.md#autotoc_md45',1,'📄 License'],['..//home/schiller/projektit/calendar/README.md#autotoc_md82',1,'📄 License']]]
 ];

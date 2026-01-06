@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['🐛_20debugging_0',['🐛 debugging',['../index.html#autotoc_md25',1,'🐛 Debugging'],['..//home/schiller/projektit/calendar/README.md#autotoc_md63',1,'🐛 Debugging']]]
+  ['🏗️_20project_20structure_0',['🏗️ project structure',['..//home/schiller/projektit/calendar/docs/README.md#autotoc_md22',1,'🏗️ Project Structure'],['..//home/schiller/projektit/calendar/README.md#autotoc_md60',1,'🏗️ Project Structure']]]
 ];

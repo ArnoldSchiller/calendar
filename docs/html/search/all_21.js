@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['📄_20license_0',['📄 license',['../index.html#autotoc_md31',1,'📄 License'],['..//home/schiller/projektit/calendar/README.md#autotoc_md69',1,'📄 License']]]
+  ['👥_20contributing_0',['👥 contributing',['..//home/schiller/projektit/calendar/docs/README.md#autotoc_md43',1,'👥 Contributing'],['..//home/schiller/projektit/calendar/README.md#autotoc_md80',1,'👥 Contributing']]]
 ];

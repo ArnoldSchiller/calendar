@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['🙏_20acknowledgments_0',['🙏 acknowledgments',['../index.html#autotoc_md35',1,'🙏 Acknowledgments'],['..//home/schiller/projektit/calendar/README.md#autotoc_md73',1,'🙏 Acknowledgments']]]
+  ['🔬_20technical_20comparison_0',['🔬 technical comparison',['..//home/schiller/projektit/calendar/docs/README.md#autotoc_md27',1,'🔬 Technical Comparison'],['..//home/schiller/projektit/calendar/README.md#autotoc_md65',1,'🔬 Technical Comparison']]]
 ];

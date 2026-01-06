@@ -1,4 +1,5 @@
 var searchData=
 [
-  ['🌍_20internationalization_20translations_0',['🌍 internationalization translations',['../index.html#autotoc_md11',1,'🌍 Internationalization &amp; Translations'],['..//home/schiller/projektit/calendar/README.md#autotoc_md49',1,'🌍 Internationalization &amp; Translations']]]
+  ['⚙️_20installation_0',['⚙️ installation',['..//home/schiller/projektit/calendar/docs/README.md#autotoc_md24',1,'⚙️ Installation'],['..//home/schiller/projektit/calendar/README.md#autotoc_md62',1,'⚙️ Installation']]],
+  ['⚙️_20installation_20entwickler_1',['⚙️ Installation (Entwickler)',['../dd/d3e/md_README_8de.html#autotoc_md54',1,'']]]
 ];

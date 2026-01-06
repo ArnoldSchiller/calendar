@@ -1,10 +1,8 @@
 var searchData=
 [
-  ['navtree_2ejs_0',['navtree.js',['../d6/d95/navtree_8js.html',1,'']]],
-  ['navtreedata_2ejs_1',['navtreedata.js',['../d6/d5f/navtreedata_8js.html',1,'']]],
-  ['navtreeindex0_2ejs_2',['navtreeindex0.js',['../d6/dcd/navtreeindex0_8js.html',1,'']]],
-  ['navtreeindex1_2ejs_3',['navtreeindex1.js',['../d3/de8/navtreeindex1_8js.html',1,'']]],
-  ['nb_2ejson_4',['nb.json',['../d9/da1/nb_8json.html',1,'']]],
-  ['nl_2ejson_5',['nl.json',['../d4/d5e/nl_8json.html',1,'']]],
-  ['nn_2ejson_6',['nn.json',['../d9/da1/nn_8json.html',1,'']]]
+  ['mainpage_2emd_0',['mainpage.md',['../dc/dc6/mainpage_8md.html',1,'']]],
+  ['metadata_2ejson_1',['metadata.json',['../d4/d74/files_2calendar_0dprojektit_8de_2metadata_8json.html',1,'(Global Namespace)'],['../dd/dee/metadata_8json.html',1,'(Global Namespace)']]],
+  ['modular_20files_2',['modular files',['../d7/d46/md_docs_2html_2mainpage.html#autotoc_md6',1,'Development build (modular files)'],['../index.html#autotoc_md13',1,'Development build (modular files)']]],
+  ['monitor_20cinnamon_20logs_20for_20applet_20errors_3',['monitor cinnamon logs for applet errors',['../d7/d46/md_docs_2html_2mainpage.html#autotoc_md10',1,'Monitor Cinnamon logs for applet errors'],['../index.html#autotoc_md17',1,'Monitor Cinnamon logs for applet errors']]],
+  ['mt_2ejson_4',['mt.json',['../df/dcc/mt_8json.html',1,'']]]
 ];
