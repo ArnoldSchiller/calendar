@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['👥_20contributing_0',['👥 contributing',['../index.html#autotoc_md62',1,'👥 Contributing'],['..//home/schiller/projektit/calendar/README.md#autotoc_md129',1,'👥 Contributing']]]
+  ['📝_20beschreibung_0',['📝 Beschreibung',['../dd/d3e/md_README_8de.html#autotoc_md38',1,'']]]
 ];

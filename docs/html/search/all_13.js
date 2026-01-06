@@ -1,12 +1,18 @@
 var searchData=
 [
-  ['readme_2ede_2emd_0',['README.de.md',['../da/d71/README_8de_8md.html',1,'']]],
-  ['readme_2emd_1',['readme.md',['../d4/d84/docs_2README_8md.html',1,'(Global Namespace)'],['../da/ddd/README_8md.html',1,'(Global Namespace)']]],
-  ['resize_2ejs_2',['resize.js',['../da/d95/resize_8js.html',1,'']]],
-  ['rewrite_3',['🏗️ Architectural Rewrite',['../d4/d40/md_CHANGELOG.html#autotoc_md2',1,'']]],
-  ['rewrite_202026_4',['v1.0.0 (Rewrite 2026)',['../d4/d40/md_CHANGELOG.html#autotoc_md1',1,'']]],
-  ['ro_2ejson_5',['ro.json',['../d0/db4/ro_8json.html',1,'']]],
-  ['roadmap_6',['roadmap',['../index.html#autotoc_md58',1,'Updated Known Limitations &amp; Roadmap'],['..//home/schiller/projektit/calendar/README.md#autotoc_md125',1,'Updated Known Limitations &amp; Roadmap']]],
-  ['roadmap_20todo_7',['roadmap todo',['../index.html#autotoc_md55',1,'🚀 Roadmap / TODO'],['..//home/schiller/projektit/calendar/README.md#autotoc_md122',1,'🚀 Roadmap / TODO']]],
-  ['ru_2ejson_8',['ru.json',['../dd/dcb/ru_8json.html',1,'']]]
+  ['search_2ejs_0',['search.js',['../d2/d19/search_8js.html',1,'']]],
+  ['searchdata_2ejs_1',['searchdata.js',['../df/d80/searchdata_8js.html',1,'']]],
+  ['settings_2dschema_2ejson_2',['settings-schema.json',['../d8/dae/settings-schema_8json.html',1,'(Global Namespace)'],['../d9/d7f/files_2calendar_0dprojektit_8de_2settings-schema_8json.html',1,'(Global Namespace)']]],
+  ['si_2ejson_3',['si.json',['../d6/db8/si_8json.html',1,'']]],
+  ['sk_2ejson_4',['sk.json',['../da/dcc/sk_8json.html',1,'']]],
+  ['sl_2ejson_5',['sl.json',['../d9/d9f/sl_8json.html',1,'']]],
+  ['sr_2ejson_6',['sr.json',['../d9/da0/sr_8json.html',1,'']]],
+  ['sr_40ijekavian_2ejson_7',['sr@ijekavian.json',['../d2/da0/sr_0dijekavian_8json.html',1,'']]],
+  ['sr_40ijekavianlatin_2ejson_8',['sr@ijekavianlatin.json',['../db/d86/sr_0dijekavianlatin_8json.html',1,'']]],
+  ['sr_40latin_2ejson_9',['sr@latin.json',['../d9/dcd/sr_0dlatin_8json.html',1,'']]],
+  ['structure_10',['structure',['../index.html#autotoc_md8',1,'🏗️ Project Structure'],['..//home/schiller/projektit/calendar/README.md#autotoc_md46',1,'🏗️ Project Structure']]],
+  ['sv_2ejson_11',['sv.json',['../dd/d1a/sv_8json.html',1,'']]],
+  ['svg_2emin_2ejs_12',['svg.min.js',['../dc/dfd/svg_8min_8js.html',1,'']]],
+  ['system_13',['system',['../index.html#autotoc_md19',1,'📊 Holiday System'],['..//home/schiller/projektit/calendar/README.md#autotoc_md57',1,'📊 Holiday System']]],
+  ['system_20architecture_14',['System Architecture',['../dc/da6/architecture.html#autotoc_md2',1,'']]]
 ];

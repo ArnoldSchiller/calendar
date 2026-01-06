@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['📦_20dependencies_0',['📦 Dependencies',['../d4/d40/md_CHANGELOG.html#autotoc_md6',1,'']]]
+  ['🙏_20acknowledgments_0',['🙏 acknowledgments',['../index.html#autotoc_md35',1,'🙏 Acknowledgments'],['..//home/schiller/projektit/calendar/README.md#autotoc_md73',1,'🙏 Acknowledgments']]]
 ];

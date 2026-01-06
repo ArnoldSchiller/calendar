@@ -1,5 +1,4 @@
 var searchData=
 [
-  ['🏗️_20architectural_20rewrite_0',['🏗️ Architectural Rewrite',['../d4/d40/md_CHANGELOG.html#autotoc_md2',1,'']]],
-  ['🏗️_20project_20structure_1',['🏗️ project structure',['../index.html#autotoc_md13',1,'🏗️ Project Structure'],['..//home/schiller/projektit/calendar/README.md#autotoc_md80',1,'🏗️ Project Structure']]]
+  ['📄_20license_0',['📄 license',['../index.html#autotoc_md31',1,'📄 License'],['..//home/schiller/projektit/calendar/README.md#autotoc_md69',1,'📄 License']]]
 ];

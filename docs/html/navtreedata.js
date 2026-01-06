@@ -26,24 +26,6 @@ var NAVTREE =
 [
   [ "Project IT Calendar", "index.html", [
     [ "Projekt IT Calendar", "index.html", "index" ],
-    [ "Changelog - Projekt IT Calendar", "d4/d40/md_CHANGELOG.html", [
-      [ "v1.0.0 (Rewrite 2026)", "d4/d40/md_CHANGELOG.html#autotoc_md1", [
-        [ "🏗️ Architectural Rewrite", "d4/d40/md_CHANGELOG.html#autotoc_md2", null ],
-        [ "🎉 New Features", "d4/d40/md_CHANGELOG.html#autotoc_md3", null ],
-        [ "🔧 Technical Improvements", "d4/d40/md_CHANGELOG.html#autotoc_md4", null ],
-        [ "🐛 Bugs Fixed from Original", "d4/d40/md_CHANGELOG.html#autotoc_md5", null ],
-        [ "📦 Dependencies", "d4/d40/md_CHANGELOG.html#autotoc_md6", null ]
-      ] ]
-    ] ],
-    [ "Architecture Overview", "dc/da6/architecture.html", [
-      [ "System Architecture", "dc/da6/architecture.html#autotoc_md7", [
-        [ "Description", "dc/da6/architecture.html#autotoc_md8", null ]
-      ] ]
-    ] ],
-    [ "Projekt IT Calendar", "dd/d3e/md_README_8de.html", [
-      [ "📝 Beschreibung", "dd/d3e/md_README_8de.html#autotoc_md72", null ],
-      [ "⚙️ Installation (Entwickler)", "dd/d3e/md_README_8de.html#autotoc_md74", null ]
-    ] ],
     [ "Files", "files.html", [
       [ "File List", "files.html", "files_dup" ]
     ] ]
@@ -53,7 +35,7 @@ var NAVTREE =
 var NAVTREEINDEX =
 [
 "d0/d11/all__4_8js.html",
-"db/d52/EventManager_8ts_source.html"
+"db/d86/sr_0dijekavianlatin_8json.html"
 ];
 
 var SYNCONMSG = 'click to disable panel synchronisation';

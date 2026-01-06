@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['⚠️_20technical_20limitations_20eds_20gjs_20bindings_0',['⚠️ technical limitations eds gjs bindings',['../index.html#autotoc_md59',1,'⚠️ Technical Limitations (EDS &amp; GJS Bindings)'],['..//home/schiller/projektit/calendar/README.md#autotoc_md126',1,'⚠️ Technical Limitations (EDS &amp; GJS Bindings)']]]
+  ['🌐_20contact_20links_0',['🌐 contact links',['../index.html#autotoc_md33',1,'🌐 Contact &amp; Links'],['..//home/schiller/projektit/calendar/README.md#autotoc_md71',1,'🌐 Contact &amp; Links']]]
 ];

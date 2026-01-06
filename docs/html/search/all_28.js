@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['🔌_20event_20integration_0',['🔌 event integration',['../index.html#autotoc_md42',1,'🔌 Event Integration'],['..//home/schiller/projektit/calendar/README.md#autotoc_md109',1,'🔌 Event Integration']]]
+  ['🚀_20roadmap_20todo_0',['🚀 roadmap todo',['../index.html#autotoc_md27',1,'🚀 Roadmap / TODO'],['..//home/schiller/projektit/calendar/README.md#autotoc_md65',1,'🚀 Roadmap / TODO']]]
 ];

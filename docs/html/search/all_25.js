@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['📊_20holiday_20system_0',['📊 holiday system',['../index.html#autotoc_md37',1,'📊 Holiday System'],['..//home/schiller/projektit/calendar/README.md#autotoc_md104',1,'📊 Holiday System']]]
+  ['🔧_20building_0',['🔧 building',['../index.html#autotoc_md15',1,'🔧 Building'],['..//home/schiller/projektit/calendar/README.md#autotoc_md53',1,'🔧 Building']]]
 ];

@@ -1,5 +1,5 @@
 var searchData=
 [
-  ['ja_2ejson_0',['ja.json',['../df/df1/ja_8json.html',1,'']]],
-  ['jquery_2ejs_1',['jquery.js',['../d5/de7/jquery_8js.html',1,'']]]
+  ['kk_2ejson_0',['kk.json',['../d5/d10/kk_8json.html',1,'']]],
+  ['ko_2ejson_1',['ko.json',['../d8/d48/ko_8json.html',1,'']]]
 ];

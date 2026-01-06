@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['🌐_20contact_20links_0',['🌐 contact links',['../index.html#autotoc_md67',1,'🌐 Contact &amp; Links'],['..//home/schiller/projektit/calendar/README.md#autotoc_md134',1,'🌐 Contact &amp; Links']]]
+  ['🎨_20customization_0',['🎨 customization',['../index.html#autotoc_md23',1,'🎨 Customization'],['..//home/schiller/projektit/calendar/README.md#autotoc_md61',1,'🎨 Customization']]]
 ];

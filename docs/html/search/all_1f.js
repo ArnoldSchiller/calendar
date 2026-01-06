@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['🎉_20new_20features_0',['🎉 New Features',['../d4/d40/md_CHANGELOG.html#autotoc_md3',1,'']]]
+  ['🐛_20debugging_0',['🐛 debugging',['../index.html#autotoc_md25',1,'🐛 Debugging'],['..//home/schiller/projektit/calendar/README.md#autotoc_md63',1,'🐛 Debugging']]]
 ];
