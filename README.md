@@ -342,22 +342,6 @@ journalctl -f -o cat /usr/bin/cinnamon 2>&1 | grep -E "calendar@projektit|Calend
 
 ---
 
-## 👥 Contributing
-
-1. **Fork the repository**
-2. **Create a feature branch:**
-   ```bash
-   git checkout -b feature/amazing-feature
-   ```
-3. **Make changes and commit:**
-   ```bash
-   git commit -m 'Add amazing feature'
-   ```
-4. **Push to your fork:**
-   ```bash
-   git push origin feature/amazing-feature
-   ```
-5. **Open a Pull Request**
 
 ### Translation Contributions:
 - Edit `.po` files in `/locale/`
@@ -387,7 +371,8 @@ This project is licensed under the **GPL-3.0-or-later License**.
 - **GNOME/GTK** for the underlying technologies
 - **TypeScript** for bringing modern JavaScript to Cinnamon
 - **All Contributors** who help improve this applet
-```
+
+## *ADDENDUM* Contributing & Development ##
 
 # Project IT Calendar – Architecture, Build System & Extension Guide
 Overview
