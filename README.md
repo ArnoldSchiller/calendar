@@ -192,6 +192,9 @@ ln -s "$PWD/files/calendar@projektit.de" ~/.local/share/cinnamon/applets/
 ## 🔧 Building
 
 ### Development Mode (Modular):
+
+*Please read the addendum at the end of this README!*
+
 ```bash
 ./build.sh dev
 ```
